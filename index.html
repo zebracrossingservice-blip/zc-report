@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- 修改瀏覽器標籤頁標題 -->
+    <!-- 瀏覽器標籤頁標題 -->
     <title>ZC 門市績效系統</title>
 
-    <!-- 加入 OG 標籤，確保 LINE 分享時顯示正確名稱 -->
+    <!-- OG 標籤，確保分享時顯示正確名稱 -->
     <meta property="og:title" content="ZC 門市績效系統">
     <meta property="og:description" content="ZC 專用業績回報與門市管理系統">
     <meta property="og:type" content="website">
-    <!-- 如果有 Logo 圖片 URL 可以放在這裡 -->
     <meta property="og:image" content="https://raw.githubusercontent.com/lucide-react/lucide/main/icons/pink-heart.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -54,6 +53,20 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.4); }
+
+        .google-sheet-btn {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        .google-sheet-btn:hover { background: #059669; transform: scale(1.02); }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -67,6 +80,13 @@
             <h1 class="text-4xl font-extrabold text-gray-800 tracking-tight">《ZC》門市績效系統 🎀</h1>
             <p class="text-pink-600 font-medium mt-2">辛苦了！每一份記錄都是成長的足跡 ✨</p>
         </header>
+
+        <!-- Google 試算表連結區 -->
+        <div class="flex justify-end mb-4">
+            <a href="https://docs.google.com/spreadsheets/d/1O0z1I6v_wXQY0t_WclN89pDOfL4O60p8gUuO924M6V4/edit" target="_blank" class="google-sheet-btn shadow-lg text-sm">
+                📊 查看後端數據表
+            </a>
+        </div>
 
         <form id="storeForm" class="card p-6 md:p-10 mb-8">
             <!-- 基本資訊 -->
@@ -136,12 +156,6 @@
                                 <optgroup label="支援人員">
                                     <option value="支援 1">支援 1</option>
                                     <option value="支援 2">支援 2</option>
-                                    <option value="支援 3">支援 3</option>
-                                </optgroup>
-                                <optgroup label="試上人員">
-                                    <option value="試上 1">試上 1</option>
-                                    <option value="試上 2">試上 2</option>
-                                    <option value="試上 3">試上 3</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -175,12 +189,6 @@
                 <input type="text" name="hot_item_5" placeholder="5. 貨號/名稱">
             </div>
 
-            <label>門市課程訓練進度 (選填)</label>
-            <textarea name="training_progress" rows="2" placeholder="若今日有進行員工教育訓練，請紀錄內容或進度..."></textarea>
-
-            <label>需補商品 / 備品 / 異常事項</label>
-            <textarea name="restock" rows="2" placeholder="豹紋紙袋夠嗎？是否有東西需要維修？"></textarea>
-
             <div class="section-title"><span>💡</span> 高層回饋與團隊反映</div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 md:mb-0">
@@ -208,13 +216,11 @@
         </div>
         
         <footer class="text-center mt-10 pb-10 text-pink-400 text-sm">
-            ZC Performance System v2.8 • 已修正分享標題
+            ZC Performance System v3.0 • ✨ 活力版 ✨
         </footer>
     </div>
 
     <script>
-        // 注意：發布後若 LINE 標題未更新，是因為 LINE 有快取。
-        // 請到 LINE 官方檢測工具網址：https://poker.line.me/ 輸入網址清除快取。
         const scriptURL = 'https://script.google.com/macros/s/AKfycby9QLEMRA_wJUFImeJqNyN-GXkNpFim1MYuPHCCy-HJctbUvHpnpVqVpKVkcuymu8kJhA/exec'; 
 
         document.getElementById('date').valueAsDate = new Date();
@@ -223,10 +229,12 @@
 
         function updateCheer(el) {
             const row = el.closest('.staff-group');
-            const name = row.querySelector('.staff-select').value;
+            const nameEl = row.querySelector('.staff-select');
+            const name = nameEl.options[nameEl.selectedIndex].text;
             const vip = parseInt(row.querySelector('input[name="staff_vip[]"]').value) || 0;
             const cheerMsg = row.querySelector('.cheer-msg');
-            if (!name) { cheerMsg.style.display = 'none'; return; }
+            
+            if (!nameEl.value) { cheerMsg.style.display = 'none'; return; }
             cheerMsg.style.display = 'block';
             cheerMsg.innerText = vip > 0 ? `🔥 厲害！${name.split(' ')[0]} 已經開發 ${vip} 位 VIP 了！` : `✨ ${name.split(' ')[0]} 今天也辛苦了，加油！`;
         }
@@ -306,8 +314,6 @@
             report += `《 個人績效明細 💃 》\n${perfText}\n`;
             report += `《 門店現況分析 📝 》\n${data.get('analysis') || '無'}\n\n`;
             report += `《 今日熱銷排名 🔥 》\n${hotItems || '無'}\n`;
-            report += `《 課程訓練進度 🎓 》\n${data.get('training_progress') || '無'}\n\n`;
-            report += `《 補貨與異常 ⚠️ 》\n${data.get('restock') || '無'}\n\n`;
             report += `《 老闆 ALY 反映 💼 》\n${data.get('feedback_aly') || '無'}\n\n`;
             report += `《 團隊 Rita 反映 👑 》\n${data.get('feedback_rita') || '無'}\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
