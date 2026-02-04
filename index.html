@@ -29,13 +29,13 @@
 
     <div class="max-w-4xl mx-auto">
         <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">《ZC》人員績效回報</h1>
-            <p class="text-pink-600 font-medium">門市人員績效與店務反饋</p>
+            <h1 class="text-3xl font-bold text-gray-800">《ZC》門市業績系統</h1>
+            <p class="text-pink-600 font-medium">數據自動同步傳輸 (2.0 修復版)</p>
         </header>
 
         <form id="storeForm" class="card p-6 mb-6">
             <div class="section-title">基本資訊</div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label>回報單位</label>
                     <select name="store_name" id="store_name" required>
@@ -55,9 +55,17 @@
                         <option value="日">日</option>
                     </select>
                 </div>
+                <div><label>今日進店人流</label><input type="number" name="visitor_count" value="0"></div>
             </div>
 
-            <div class="section-title">人員績效明細 (個績)</div>
+            <div class="section-title">今日數據總計 (不含金額)</div>
+            <div class="grid grid-cols-3 gap-4">
+                <div><label>總件數</label><input type="number" name="total_items" required></div>
+                <div><label>總筆數</label><input type="number" name="total_orders" required></div>
+                <div><label>全店新增 VIP</label><input type="number" name="total_vip_all" value="0"></div>
+            </div>
+
+            <div class="section-title">人員績效明細</div>
             <div id="staffContainer">
                 <div class="perf-row staff-group">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
@@ -95,7 +103,7 @@
             <label>門店現況分析 (環境、客群、效率)</label>
             <textarea name="analysis" rows="3" placeholder="請填寫今日觀察..."></textarea>
             
-            <label>熱銷排名 / 顧客尋找商品</label>
+            <label>熱銷排名 / 客戶尋找商品</label>
             <textarea name="feedback" rows="2" placeholder="1. &#10;2. "></textarea>
 
             <label>需補商品 / 備品 / 異常事項</label>
@@ -160,7 +168,7 @@
             })
             .catch(err => {
                 console.error('Error:', err);
-                alert('同步異常，請使用預覽功能手動複製文字。');
+                alert('連線異常，請手動複製 LINE 文字。');
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('submitBtn').disabled = false;
                 generatePreview();
@@ -174,17 +182,19 @@
             const vips = data.getAll('staff_vip[]');
             
             let perfText = "";
-            let totalVip = 0;
+            let totalVipFromStaff = 0;
             names.forEach((n, i) => { 
                 if(n) {
                     perfText += `・${n}: ${counts[i]} 件 [VIP:+${vips[i]}]\n`; 
-                    totalVip += parseInt(vips[i]) || 0;
+                    totalVipFromStaff += parseInt(vips[i]) || 0;
                 }
             });
 
-            let report = `《${data.get('store_name')}》人員績效報告\n`;
+            let report = `《${data.get('store_name')}》日報回報\n`;
             report += `日期：${data.get('date')} (${data.get('weekday')})\n`;
-            report += `今日總 VIP 開發：${totalVip}\n\n`;
+            report += `進店人流：${data.get('visitor_count')} 人\n`;
+            report += `件/筆數：${data.get('total_items')} / ${data.get('total_orders')}\n`;
+            report += `全店 VIP 開發：${data.get('total_vip_all')}\n\n`;
             report += `《個人績效明細》\n${perfText}\n`;
             report += `《門店分析》\n${data.get('analysis') || '無'}\n\n`;
             report += `《異常/熱銷/補貨》\n${data.get('feedback') || '無'}\n${data.get('restock') || ''}`;
@@ -202,5 +212,7 @@
             alert('回報文字已複製！');
         }
     </script>
+</body>
+</html></script>
 </body>
 </html>
