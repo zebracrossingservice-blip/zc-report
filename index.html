@@ -29,7 +29,7 @@
 
     <div class="max-w-4xl mx-auto">
         <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">《ZC》門市業績系統</h1>
+            <h1 class="text-3xl font-bold text-gray-800">《ZC》門市績效系統</h1>
             <p class="text-pink-600 font-medium">數據自動同步傳輸 (2.0 修復版)</p>
         </header>
 
@@ -95,6 +95,12 @@
                         <div><label>VIP開發</label><input type="number" name="staff_vip[]" value="0"></div>
                         <div><label>展示照片</label><input type="number" name="photo_show[]" value="0"></div>
                     </div>
+                    <!-- 新增的三個欄位 -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div><label>人員穿搭</label><input type="number" name="staff_outfit[]" value="0"></div>
+                        <div><label>詢問次數</label><input type="number" name="staff_ask[]" value="0"></div>
+                        <div><label>買單次數</label><input type="number" name="staff_buy[]" value="0"></div>
+                    </div>
                 </div>
             </div>
             <button type="button" onclick="addStaff()" class="text-sm text-pink-600 font-bold mb-4">+ 新增人員欄位</button>
@@ -125,10 +131,8 @@
     </div>
 
     <script>
-        // 【已嵌入您提供的網址】
         const scriptURL = 'https://script.google.com/macros/s/AKfycby9QLEMRA_wJUFImeJqNyN-GXkNpFim1MYuPHCCy-HJctbUvHpnpVqVpKVkcuymu8kJhA/exec'; 
 
-        // 初始化日期
         document.getElementById('date').valueAsDate = new Date();
         const dayMap = ['日','一','二','三','四','五','六'];
         document.getElementById('weekday').value = dayMap[new Date().getDay()];
@@ -139,11 +143,16 @@
             const div = document.createElement('div');
             div.className = 'perf-row staff-group';
             div.innerHTML = `
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
                     <div><label>銷售人員</label><select name="staff_name[]" class="staff-select">${sourceSelect.innerHTML}</select></div>
                     <div><label>銷售件數</label><input type="number" name="staff_count[]" value="0"></div>
                     <div><label>VIP開發</label><input type="number" name="staff_vip[]" value="0"></div>
                     <div><label>展示照片</label><input type="number" name="photo_show[]" value="0"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div><label>人員穿搭</label><input type="number" name="staff_outfit[]" value="0"></div>
+                    <div><label>詢問次數</label><input type="number" name="staff_ask[]" value="0"></div>
+                    <div><label>買單次數</label><input type="number" name="staff_buy[]" value="0"></div>
                 </div>
             `;
             container.appendChild(div);
@@ -180,13 +189,15 @@
             const names = data.getAll('staff_name[]');
             const counts = data.getAll('staff_count[]');
             const vips = data.getAll('staff_vip[]');
+            const outfits = data.getAll('staff_outfit[]');
+            const asks = data.getAll('staff_ask[]');
+            const buys = data.getAll('staff_buy[]');
             
             let perfText = "";
-            let totalVipFromStaff = 0;
             names.forEach((n, i) => { 
                 if(n) {
                     perfText += `・${n}: ${counts[i]} 件 [VIP:+${vips[i]}]\n`; 
-                    totalVipFromStaff += parseInt(vips[i]) || 0;
+                    perfText += `  (穿搭:${outfits[i]} / 詢問:${asks[i]} / 買單:${buys[i]})\n`;
                 }
             });
 
@@ -212,7 +223,5 @@
             alert('回報文字已複製！');
         }
     </script>
-</body>
-</html></script>
 </body>
 </html>
