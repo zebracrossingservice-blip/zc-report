@@ -3,7 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 修改瀏覽器標籤頁標題 -->
     <title>ZC 門市績效系統</title>
+
+    <!-- 加入 OG 標籤，確保 LINE 分享時顯示正確名稱 -->
+    <meta property="og:title" content="ZC 門市績效系統">
+    <meta property="og:description" content="ZC 專用業績回報與門市管理系統">
+    <meta property="og:type" content="website">
+    <!-- 如果有 Logo 圖片 URL 可以放在這裡 -->
+    <meta property="og:image" content="https://raw.githubusercontent.com/lucide-react/lucide/main/icons/pink-heart.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -165,14 +175,12 @@
                 <input type="text" name="hot_item_5" placeholder="5. 貨號/名稱">
             </div>
 
-            <!-- 新增：門市課程訓練進度 -->
             <label>門市課程訓練進度 (選填)</label>
             <textarea name="training_progress" rows="2" placeholder="若今日有進行員工教育訓練，請紀錄內容或進度..."></textarea>
 
             <label>需補商品 / 備品 / 異常事項</label>
             <textarea name="restock" rows="2" placeholder="豹紋紙袋夠嗎？是否有東西需要維修？"></textarea>
 
-            <!-- 管理層專區 -->
             <div class="section-title"><span>💡</span> 高層回饋與團隊反映</div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 md:mb-0">
@@ -200,11 +208,13 @@
         </div>
         
         <footer class="text-center mt-10 pb-10 text-pink-400 text-sm">
-            ZC Performance System v2.7 • 新增課程訓練欄位
+            ZC Performance System v2.8 • 已修正分享標題
         </footer>
     </div>
 
     <script>
+        // 注意：發布後若 LINE 標題未更新，是因為 LINE 有快取。
+        // 請到 LINE 官方檢測工具網址：https://poker.line.me/ 輸入網址清除快取。
         const scriptURL = 'https://script.google.com/macros/s/AKfycby9QLEMRA_wJUFImeJqNyN-GXkNpFim1MYuPHCCy-HJctbUvHpnpVqVpKVkcuymu8kJhA/exec'; 
 
         document.getElementById('date').valueAsDate = new Date();
