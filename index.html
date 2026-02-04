@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中原門市業績系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #fdf2f8; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        label { font-weight: 600; color: #4b5563; margin-bottom: 0.4rem; display: block; }
+        input, select, textarea { 
+            width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 1rem; font-size: 16px;
+        }
+        input:focus, textarea:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2); }
+        .section-title { border-left: 5px solid #ec4899; padding-left: 0.75rem; margin: 1.5rem 0 1rem 0; font-size: 1.1rem; font-weight: bold; color: #be185d; }
+        .perf-row { background: #fff1f2; padding: 1.25rem; border-radius: 12px; margin-bottom: 1rem; border: 1px dashed #fda4af; }
+        .alert-hint { font-size: 0.75rem; color: #e11d48; margin-top: -0.75rem; margin-bottom: 0.75rem; font-weight: bold; }
+        #loadingOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; align-items: center; justify-content: center; color: white; flex-direction: column; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div id="loadingOverlay">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-pink-500 border-t-transparent mb-4"></div>
+        <p class="font-bold">數據同步中，請稍候...</p>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">《中原門市》日報系統</h1>
+            <p class="text-pink-600 font-medium">資料將直接存入您的 Google 試算表</p>
+        </header>
+
+        <form id="storeForm" class="card p-6 mb-6">
+            <div class="section-title">基本資訊</div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div><label>日期</label><input type="date" name="date" id="date" required></div>
+                <div>
+                    <label>星期</label>
+                    <select name="weekday" id="weekday">
+                        <option value="一">一</option><option value="二">二</option><option value="三">三</option>
+                        <option value="四">四</option><option value="五">五</option><option value="六">六</option>
+                        <option value="日">日</option>
+                    </select>
+                </div>
+                <div><label>今日進店人流</label><input type="number" name="visitor_count" value="0"></div>
+            </div>
+
+            <div class="section-title">全店營業總計</div>
+            <div class="grid grid-cols-3 gap-4">
+                <div><label>總營業額</label><input type="number" name="total_sales" required placeholder="$"></div>
+                <div><label>總件數</label><input type="number" name="total_items" required></div>
+                <div><label>總筆數</label><input type="number" name="total_orders" required></div>
+            </div>
+
+            <div class="section-title">個人績效 (個績)</div>
+            <div id="staffContainer">
+                <div class="perf-row staff-group">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                            <label>銷售人員</label>
+                            <select name="staff_name[]">
+                                <option value="">選人員</option>
+                                <option value="ZC1">ZC1</option>
+                                <option value="ZC2">ZC2</option>
+                                <option value="ZC3">ZC3</option>
+                            </select>
+                        </div>
+                        <div><label>銷售件數</label><input type="number" name="staff_count[]"><p class="alert-hint">※須扣除250內</p></div>
+                        <div><label>VIP開發</label><input type="number" name="staff_vip[]" value="0"></div>
+                        <div><label>展示照片</label><input type="number" name="photo_show[]" value="0"></div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="addStaff()" class="text-sm text-pink-600 font-bold mb-4">+ 新增人員欄位</button>
+
+            <div class="section-title">分析與回饋</div>
+            <label>門店分析</label>
+            <textarea name="analysis" rows="2" placeholder="今日人流特性..."></textarea>
+            
+            <label>熱銷排名 (前五)</label>
+            <textarea name="feedback" rows="4" placeholder="1. &#10;2. &#10;3. &#10;4. &#10;5. "></textarea>
+            
+            <label>客人尋找商品</label>
+            <textarea name="searching_items" rows="2"></textarea>
+            
+            <label>需補商品/備品</label>
+            <textarea name="restock" rows="2"></textarea>
+
+            <div class="flex flex-col sm:flex-row gap-4 mt-6">
+                <button type="submit" id="submitBtn" class="flex-1 bg-pink-600 text-white font-bold py-4 rounded-xl hover:bg-pink-700 active:scale-95 transition shadow-lg">儲存並送出數據</button>
+                <button type="button" onclick="generatePreview()" class="flex-1 bg-gray-600 text-white font-bold py-4 rounded-xl hover:bg-gray-700 active:scale-95 transition">預覽 LINE 回報</button>
+            </div>
+        </form>
+
+        <div id="resultContainer" class="card p-6 hidden">
+            <h2 class="text-xl font-bold mb-4 flex justify-between items-center text-pink-700">LINE 回報預覽<button onclick="copyToClipboard()" class="text-sm bg-pink-100 px-3 py-1 rounded">複製文字</button></h2>
+            <pre id="resultText" class="whitespace-pre-wrap bg-gray-50 p-4 rounded border text-sm text-gray-700"></pre>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzTbp-Tre7LmshX7CjeiQ5al4OcFDXEUMK9VFfkau24al2AU65PW6GlnQFjXEOKfFPjag/exec'; 
+
+        document.getElementById('date').valueAsDate = new Date();
+        const dayMap = ['日','一','二','三','四','五','六'];
+        document.getElementById('weekday').value = dayMap[new Date().getDay()];
+
+        function addStaff() {
+            const container = document.getElementById('staffContainer');
+            const div = document.createElement('div');
+            div.className = 'perf-row staff-group';
+            div.innerHTML = `<div class="grid grid-cols-2 md:grid-cols-4 gap-3"><div><label>銷售人員</label><select name="staff_name[]"><option value="">選人員</option><option value="ZC1">ZC1</option><option value="ZC2">ZC2</option><option value="ZC3">ZC3</option></select></div><div><label>銷售件數</label><input type="number" name="staff_count[]"><p class="alert-hint">※須扣除250內</p></div><div><label>VIP開發</label><input type="number" name="staff_vip[]" value="0"></div><div><label>展示照片</label><input type="number" name="photo_show[]" value="0"></div></div>`;
+            container.appendChild(div);
+        }
+
+        const form = document.getElementById('storeForm');
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('submitBtn').disabled = true;
+            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+                .then(() => { 
+                    alert('數據已成功儲存至試算表！'); 
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    document.getElementById('submitBtn').disabled = false; 
+                    generatePreview(); 
+                })
+                .catch(() => { 
+                    alert('儲存失敗，請檢查網路。'); 
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    document.getElementById('submitBtn').disabled = false; 
+                });
+        });
+
+        function generatePreview() {
+            const data = new FormData(form);
+            const names = data.getAll('staff_name[]');
+            const counts = data.getAll('staff_count[]');
+            const vips = data.getAll('staff_vip[]');
+            const photos = data.getAll('photo_show[]');
+            let perf = ""; let totalVip = 0;
+            names.forEach((n, i) => { if(n) { perf += `・${n}: ${counts[i]} 件 [VIP+${vips[i]}] <照:${photos[i]}>\n`; totalVip += parseInt(vips[i])||0; }});
+            let report = `《中原門市》日報分析\n日期：${data.get('date')} (${data.get('weekday')})\n人流：${data.get('visitor_count')}\n業績：${data.get('total_sales')}\n件/筆：${data.get('total_items')} / ${data.get('total_orders')}\n今日總VIP：${totalVip}\n\n《個人績效》\n${perf}\n《分析》\n${data.get('analysis')}\n\n《熱銷前五》\n${data.get('feedback')}\n\n《尋找商品》\n${data.get('searching_items')}\n\n《需補備品》\n${data.get('restock')}`;
+            document.getElementById('resultText').innerText = report;
+            document.getElementById('resultContainer').classList.remove('hidden');
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('resultText').innerText;
+            const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); alert('已複製回報文字！');
+        }
+    </script>
+</body>
+</html>
