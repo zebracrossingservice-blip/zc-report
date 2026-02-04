@@ -6,128 +6,193 @@
     <title>ZC 門市績效系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #fdf2f8; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        .card { background: white; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        label { font-weight: 600; color: #4b5563; margin-bottom: 0.4rem; display: block; }
-        input, select, textarea { 
-            width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 1rem; font-size: 16px;
+        body { 
+            background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%); 
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
         }
-        input:focus, textarea:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2); }
-        .section-title { border-left: 5px solid #ec4899; padding-left: 0.75rem; margin: 1.5rem 0 1rem 0; font-size: 1.1rem; font-weight: bold; color: #be185d; }
-        .perf-row { background: #fff1f2; padding: 1.25rem; border-radius: 12px; margin-bottom: 1rem; border: 1px dashed #fda4af; }
-        #loadingOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; align-items: center; justify-content: center; color: white; flex-direction: column; }
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 24px; 
+            box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.1), 0 8px 10px -6px rgba(236, 72, 153, 0.1);
+            backdrop-filter: blur(8px);
+        }
+        label { font-weight: 600; color: #4b5563; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 4px; }
+        input, select, textarea { 
+            width: 100%; padding: 0.85rem; border: 1.5px solid #f9a8d4; border-radius: 14px; margin-bottom: 1rem; font-size: 16px;
+            transition: all 0.2s;
+            background-color: white;
+        }
+        input:focus, textarea:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.15); transform: translateY(-1px); }
+        .section-title { 
+            display: flex; align-items: center; gap: 8px;
+            margin: 2rem 0 1.2rem 0; font-size: 1.2rem; font-weight: 800; color: #be185d; 
+        }
+        .perf-row { 
+            background: linear-gradient(to right, #ffffff, #fff1f2); 
+            padding: 1.5rem; border-radius: 20px; margin-bottom: 1.2rem; 
+            border: 1px solid #fbcfe8;
+            position: relative;
+        }
+        #loadingOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; align-items: center; justify-content: center; color: white; flex-direction: column; backdrop-filter: blur(4px); }
         optgroup { font-weight: bold; color: #ec4899; font-style: normal; }
+        .cheer-msg { font-size: 0.85rem; color: #db2777; font-weight: bold; margin-top: -0.5rem; margin-bottom: 0.5rem; display: none; }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.4); }
     </style>
 </head>
 <body class="p-4 md:p-8">
-    <!-- 讀取遮罩 -->
     <div id="loadingOverlay">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-pink-500 border-t-transparent mb-4"></div>
-        <p class="font-bold text-lg text-white">正在連線至系統...</p>
-        <p class="text-pink-200">請勿關閉視窗</p>
+        <div class="animate-spin rounded-full h-16 w-16 border-4 border-pink-500 border-t-transparent mb-4"></div>
+        <p class="font-bold text-xl text-white">正在同步數據 ✨</p>
     </div>
 
     <div class="max-w-4xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">《ZC》門市績效系統</h1>
-            <p class="text-pink-600 font-medium">數據自動同步傳輸 (2.0 修復版)</p>
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-gray-800 tracking-tight">《ZC》門市績效系統 🎀</h1>
+            <p class="text-pink-600 font-medium mt-2">辛苦了！每一份記錄都是成長的足跡 ✨</p>
         </header>
 
-        <form id="storeForm" class="card p-6 mb-6">
-            <div class="section-title">基本資訊</div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form id="storeForm" class="card p-6 md:p-10 mb-8">
+            <!-- 基本資訊 -->
+            <div class="section-title"><span>📍</span> 基本資訊</div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
                 <div>
                     <label>回報單位</label>
                     <select name="store_name" id="store_name" required>
                         <option value="">選擇單位</option>
-                        <option value="中原門市">中原門市</option>
-                        <option value="中山門市">中山門市</option>
-                        <option value="新竹門市">新竹門市</option>
-                        <option value="倉儲中心">倉儲中心</option>
+                        <option value="中山門市">🏛️ 中山門市</option>
+                        <option value="中原門市">🏡 中原門市</option>
+                        <option value="新竹門市">🚄 新竹門市</option>
+                        <option value="倉儲中心">📦 倉儲中心</option>
                     </select>
                 </div>
                 <div><label>日期</label><input type="date" name="date" id="date" required></div>
                 <div>
                     <label>星期</label>
                     <select name="weekday" id="weekday">
-                        <option value="一">一</option><option value="二">二</option><option value="三">三</option>
-                        <option value="四">四</option><option value="五">五</option><option value="六">六</option>
-                        <option value="日">日</option>
+                        <option value="一">星期一</option><option value="二">星期二</option><option value="三">星期三</option>
+                        <option value="四">星期四</option><option value="五">星期五</option><option value="六">星期六</option>
+                        <option value="日">星期日</option>
                     </select>
                 </div>
                 <div><label>今日進店人流</label><input type="number" name="visitor_count" value="0"></div>
             </div>
 
-            <div class="section-title">今日數據總計 (不含金額)</div>
-            <div class="grid grid-cols-3 gap-4">
-                <div><label>總件數</label><input type="number" name="total_items" required></div>
-                <div><label>總筆數</label><input type="number" name="total_orders" required></div>
-                <div><label>全店新增 VIP</label><input type="number" name="total_vip_all" value="0"></div>
+            <!-- 今日數據 -->
+            <div class="section-title"><span>📊</span> 今日數據總計</div>
+            <div class="grid grid-cols-3 gap-5">
+                <div><label>總件數 🧺</label><input type="number" name="total_items" required placeholder="件"></div>
+                <div><label>總筆數 🧾</label><input type="number" name="total_orders" required placeholder="筆"></div>
+                <div><label>全店新增 VIP 💎</label><input type="number" name="total_vip_all" value="0"></div>
             </div>
 
-            <div class="section-title">人員績效明細</div>
+            <!-- 人員績效 -->
+            <div class="section-title"><span>💃</span> 人員績效明細</div>
             <div id="staffContainer">
                 <div class="perf-row staff-group">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         <div>
                             <label>銷售人員</label>
-                            <select name="staff_name[]" class="staff-select" required>
+                            <select name="staff_name[]" class="staff-select" required onchange="updateCheer(this)">
                                 <option value="">選人員</option>
-                                <optgroup label="中原店">
-                                    <option value="旗旗 zc77">旗旗 zc77</option>
-                                    <option value="柔柔 zc66">柔柔 zc66</option>
-                                </optgroup>
-                                <optgroup label="中山店">
+                                <optgroup label="中山店 - 正職">
                                     <option value="庭庭 zctt">庭庭 zctt</option>
                                     <option value="雯雯 zc55">雯雯 zc55</option>
                                 </optgroup>
-                                <optgroup label="支援/行政">
+                                <optgroup label="中山店 - 兼職">
+                                    <option value="小杜 zcdo">小杜 zcdo</option>
+                                    <option value="Reina zcre">Reina zcre</option>
+                                </optgroup>
+                                <optgroup label="中原店 - 正職">
+                                    <option value="旗旗 zc77">旗旗 zc77</option>
+                                    <option value="柔柔 zc66">柔柔 zc66</option>
+                                </optgroup>
+                                <optgroup label="中原店 - 兼職">
+                                    <option value="CC zcpt2">CC zcpt2</option>
+                                    <option value="小紜 zcpt3">小紜 zcpt3</option>
+                                </optgroup>
+                                <optgroup label="新竹店 - 兼職">
+                                    <option value="小石 zcpt4">小石 zcpt4</option>
+                                    <option value="Yuna zcpt5">Yuna zcpt5</option>
+                                    <option value="萱萱 zcpt6">萱萱 zcpt6</option>
+                                    <option value="小吉 zcpt7">小吉 zcpt7</option>
+                                </optgroup>
+                                <optgroup label="行政/後勤">
                                     <option value="庭苡">庭苡</option>
                                     <option value="彥翔">彥翔</option>
                                     <option value="阿姨">阿姨</option>
                                 </optgroup>
-                                <optgroup label="其他">
-                                    <option value="支援人員">支援人員</option>
-                                </optgroup>
                             </select>
                         </div>
                         <div><label>銷售件數</label><input type="number" name="staff_count[]" value="0"></div>
-                        <div><label>VIP開發</label><input type="number" name="staff_vip[]" value="0"></div>
+                        <div><label>VIP開發</label><input type="number" name="staff_vip[]" value="0" oninput="updateCheer(this)"></div>
                         <div><label>展示照片</label><input type="number" name="photo_show[]" value="0"></div>
                     </div>
-                    <!-- 新增的三個欄位 -->
-                    <div class="grid grid-cols-3 gap-3">
-                        <div><label>人員穿搭</label><input type="number" name="staff_outfit[]" value="0"></div>
+                    <div class="cheer-msg px-1"></div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div><label>人員穿搭 (貨號)</label><input type="text" name="staff_outfit[]" placeholder="填寫貨號"></div>
                         <div><label>詢問次數</label><input type="number" name="staff_ask[]" value="0"></div>
                         <div><label>買單次數</label><input type="number" name="staff_buy[]" value="0"></div>
                     </div>
                 </div>
             </div>
-            <button type="button" onclick="addStaff()" class="text-sm text-pink-600 font-bold mb-4">+ 新增人員欄位</button>
+            <button type="button" onclick="addStaff()" class="flex items-center gap-2 text-sm text-pink-600 font-bold mb-6 hover:text-pink-700">
+                <span class="text-lg">＋</span> 新增人員績效
+            </button>
 
-            <div class="section-title">分析與回饋</div>
+            <!-- 分析與回饋 -->
+            <div class="section-title"><span>✍️</span> 分析與回饋</div>
             <label>門店現況分析 (環境、客群、效率)</label>
-            <textarea name="analysis" rows="3" placeholder="請填寫今日觀察..."></textarea>
+            <textarea name="analysis" rows="3" placeholder="今天店裡發生了什麼有趣或值得筆記的事嗎？"></textarea>
             
-            <label>熱銷排名 / 客戶尋找商品</label>
-            <textarea name="feedback" rows="2" placeholder="1. &#10;2. "></textarea>
+            <label>今日熱銷排名 (Top 5)</label>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-2 mb-4">
+                <input type="text" name="hot_item_1" placeholder="1. 貨號/名稱">
+                <input type="text" name="hot_item_2" placeholder="2. 貨號/名稱">
+                <input type="text" name="hot_item_3" placeholder="3. 貨號/名稱">
+                <input type="text" name="hot_item_4" placeholder="4. 貨號/名稱">
+                <input type="text" name="hot_item_5" placeholder="5. 貨號/名稱">
+            </div>
 
             <label>需補商品 / 備品 / 異常事項</label>
-            <textarea name="restock" rows="2"></textarea>
+            <textarea name="restock" rows="2" placeholder="豹紋紙袋夠嗎？是否有東西需要維修？"></textarea>
 
-            <div class="flex flex-col sm:flex-row gap-4 mt-6">
-                <button type="submit" id="submitBtn" class="flex-1 bg-pink-600 text-white font-bold py-4 rounded-xl hover:bg-pink-700 active:scale-95 transition shadow-lg">儲存數據並送出</button>
-                <button type="button" onclick="generatePreview()" class="flex-1 bg-gray-600 text-white font-bold py-4 rounded-xl hover:bg-gray-700 active:scale-95 transition">僅預覽 LINE 文字</button>
+            <!-- 管理層專區 -->
+            <div class="section-title"><span>💡</span> 高層回饋與團隊反映</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 md:mb-0">
+                    <label class="text-blue-700">給老闆 ALY 的回饋反映 💼</label>
+                    <textarea name="feedback_aly" rows="3" placeholder="老闆需要知道的事項與建議..."></textarea>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
+                    <label class="text-purple-700">給隊長 Rita 的回饋反映 👑</label>
+                    <textarea name="feedback_rita" rows="3" placeholder="團隊運作、需要隊長支援的事項..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-5 mt-8">
+                <button type="submit" id="submitBtn" class="btn-primary flex-1 text-white font-bold py-5 rounded-2xl shadow-xl">完成並送出數據 🚀</button>
+                <button type="button" onclick="generatePreview()" class="flex-1 bg-gray-100 text-gray-700 font-bold py-5 rounded-2xl hover:bg-gray-200 transition">僅預覽 LINE 文字 📄</button>
             </div>
         </form>
 
-        <div id="resultContainer" class="card p-6 hidden">
-            <h2 class="text-xl font-bold mb-4 flex justify-between items-center text-pink-700">
-                LINE 回報預覽
-                <button onclick="copyToClipboard()" class="text-sm bg-pink-100 text-pink-700 px-3 py-1 rounded hover:bg-pink-200">複製報告</button>
+        <div id="resultContainer" class="card p-6 md:p-8 hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h2 class="text-2xl font-bold mb-5 flex justify-between items-center text-pink-700">
+                <span>📋 LINE 回報格式</span>
+                <button onclick="copyToClipboard()" class="text-sm bg-pink-600 text-white px-5 py-2 rounded-full hover:bg-pink-700 shadow-md transition">複製整份報告</button>
             </h2>
-            <pre id="resultText" class="whitespace-pre-wrap bg-gray-50 p-4 rounded border text-gray-700 text-sm"></pre>
+            <pre id="resultText" class="whitespace-pre-wrap bg-pink-50/50 p-6 rounded-2xl border border-pink-100 text-gray-700 text-sm leading-relaxed"></pre>
         </div>
+        
+        <footer class="text-center mt-10 pb-10 text-pink-400 text-sm">
+            ZC Performance System v2.3 • 精準條列優化版
+        </footer>
     </div>
 
     <script>
@@ -137,23 +202,35 @@
         const dayMap = ['日','一','二','三','四','五','六'];
         document.getElementById('weekday').value = dayMap[new Date().getDay()];
 
+        function updateCheer(el) {
+            const row = el.closest('.staff-group');
+            const name = row.querySelector('.staff-select').value;
+            const vip = parseInt(row.querySelector('input[name="staff_vip[]"]').value) || 0;
+            const cheerMsg = row.querySelector('.cheer-msg');
+            if (!name) { cheerMsg.style.display = 'none'; return; }
+            cheerMsg.style.display = 'block';
+            cheerMsg.innerText = vip > 0 ? `🔥 厲害！${name.split(' ')[0]} 已經開發 ${vip} 位 VIP 了！` : `✨ ${name.split(' ')[0]} 今天也辛苦了，加油！`;
+        }
+
         function addStaff() {
             const container = document.getElementById('staffContainer');
             const sourceSelect = document.querySelector('.staff-select');
             const div = document.createElement('div');
-            div.className = 'perf-row staff-group';
+            div.className = 'perf-row staff-group animate-in fade-in slide-in-from-right-4 duration-300';
             div.innerHTML = `
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                    <div><label>銷售人員</label><select name="staff_name[]" class="staff-select">${sourceSelect.innerHTML}</select></div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div><label>銷售人員</label><select name="staff_name[]" class="staff-select" onchange="updateCheer(this)">${sourceSelect.innerHTML}</select></div>
                     <div><label>銷售件數</label><input type="number" name="staff_count[]" value="0"></div>
-                    <div><label>VIP開發</label><input type="number" name="staff_vip[]" value="0"></div>
+                    <div><label>VIP開發</label><input type="number" name="staff_vip[]" value="0" oninput="updateCheer(this)"></div>
                     <div><label>展示照片</label><input type="number" name="photo_show[]" value="0"></div>
                 </div>
-                <div class="grid grid-cols-3 gap-3">
-                    <div><label>人員穿搭</label><input type="number" name="staff_outfit[]" value="0"></div>
+                <div class="cheer-msg px-1"></div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div><label>人員穿搭 (貨號)</label><input type="text" name="staff_outfit[]" placeholder="填寫貨號"></div>
                     <div><label>詢問次數</label><input type="number" name="staff_ask[]" value="0"></div>
                     <div><label>買單次數</label><input type="number" name="staff_buy[]" value="0"></div>
                 </div>
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-4 right-4 text-gray-300 hover:text-red-400">✕</button>
             `;
             container.appendChild(div);
         }
@@ -164,20 +241,13 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
             document.getElementById('submitBtn').disabled = true;
 
-            fetch(scriptURL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: new FormData(form)
-            })
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: new FormData(form)})
             .then(() => {
-                alert('數據已儲存！請至 LINE 貼上回報。');
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('submitBtn').disabled = false;
                 generatePreview();
             })
-            .catch(err => {
-                console.error('Error:', err);
-                alert('連線異常，請手動複製 LINE 文字。');
+            .catch(() => {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('submitBtn').disabled = false;
                 generatePreview();
@@ -189,6 +259,7 @@
             const names = data.getAll('staff_name[]');
             const counts = data.getAll('staff_count[]');
             const vips = data.getAll('staff_vip[]');
+            const photos = data.getAll('photo_show[]');
             const outfits = data.getAll('staff_outfit[]');
             const asks = data.getAll('staff_ask[]');
             const buys = data.getAll('staff_buy[]');
@@ -196,19 +267,31 @@
             let perfText = "";
             names.forEach((n, i) => { 
                 if(n) {
-                    perfText += `・${n}: ${counts[i]} 件 [VIP:+${vips[i]}]\n`; 
-                    perfText += `  (穿搭:${outfits[i]} / 詢問:${asks[i]} / 買單:${buys[i]})\n`;
+                    perfText += `・${n}: ${counts[i]} 件 [VIP:+${vips[i]}] <照:${photos[i]}>\n`; 
+                    perfText += `  └ 穿搭:${outfits[i] || '未填'} / 詢問:${asks[i]} / 買單:${buys[i]}\n`;
                 }
             });
 
-            let report = `《${data.get('store_name')}》日報回報\n`;
-            report += `日期：${data.get('date')} (${data.get('weekday')})\n`;
-            report += `進店人流：${data.get('visitor_count')} 人\n`;
-            report += `件/筆數：${data.get('total_items')} / ${data.get('total_orders')}\n`;
-            report += `全店 VIP 開發：${data.get('total_vip_all')}\n\n`;
-            report += `《個人績效明細》\n${perfText}\n`;
-            report += `《門店分析》\n${data.get('analysis') || '無'}\n\n`;
-            report += `《異常/熱銷/補貨》\n${data.get('feedback') || '無'}\n${data.get('restock') || ''}`;
+            let hotItems = "";
+            for(let i=1; i<=5; i++) {
+                const item = data.get(`hot_item_${i}`);
+                if(item) hotItems += `${i}. ${item}\n`;
+            }
+
+            let report = `✨ 《${data.get('store_name')}》業績績效回報 ✨\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `📅 日期：${data.get('date')} (${data.get('weekday')})\n`;
+            report += `👥 進店人流：${data.get('visitor_count')} 人\n`;
+            report += `📦 總件/筆數：${data.get('total_items')} / ${data.get('total_orders')}\n`;
+            report += `💎 全店 VIP 開發：${data.get('total_vip_all')}\n\n`;
+            report += `《 個人績效明細 💃 》\n${perfText}\n`;
+            report += `《 門店現況分析 📝 》\n${data.get('analysis') || '無'}\n\n`;
+            report += `《 今日熱銷排名 🔥 》\n${hotItems || '無'}\n`;
+            report += `《 補貨與異常 ⚠️ 》\n${data.get('restock') || '無'}\n\n`;
+            report += `《 老闆 ALY 反映 💼 》\n${data.get('feedback_aly') || '無'}\n\n`;
+            report += `《 團隊 Rita 反映 👑 》\n${data.get('feedback_rita') || '無'}\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `💕 辛苦大家了！今天也是棒棒的一天！`;
 
             document.getElementById('resultText').innerText = report;
             document.getElementById('resultContainer').classList.remove('hidden');
@@ -220,7 +303,15 @@
             const el = document.createElement('textarea');
             el.value = text; document.body.appendChild(el); el.select();
             document.execCommand('copy'); document.body.removeChild(el);
-            alert('回報文字已複製！');
+            
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "✅ 已複製！";
+            btn.classList.replace('bg-pink-600', 'bg-green-500');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.replace('bg-green-500', 'bg-pink-600');
+            }, 2000);
         }
     </script>
 </body>
