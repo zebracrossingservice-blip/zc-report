@@ -123,10 +123,15 @@
                                     <option value="萱萱 zcpt6">萱萱 zcpt6</option>
                                     <option value="小吉 zcpt7">小吉 zcpt7</option>
                                 </optgroup>
-                                <optgroup label="行政/後勤">
-                                    <option value="庭苡">庭苡</option>
-                                    <option value="彥翔">彥翔</option>
-                                    <option value="阿姨">阿姨</option>
+                                <optgroup label="支援人員">
+                                    <option value="支援 1">支援 1</option>
+                                    <option value="支援 2">支援 2</option>
+                                    <option value="支援 3">支援 3</option>
+                                </optgroup>
+                                <optgroup label="試上人員">
+                                    <option value="試上 1">試上 1</option>
+                                    <option value="試上 2">試上 2</option>
+                                    <option value="試上 3">試上 3</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -160,6 +165,10 @@
                 <input type="text" name="hot_item_5" placeholder="5. 貨號/名稱">
             </div>
 
+            <!-- 新增：門市課程訓練進度 -->
+            <label>門市課程訓練進度 (選填)</label>
+            <textarea name="training_progress" rows="2" placeholder="若今日有進行員工教育訓練，請紀錄內容或進度..."></textarea>
+
             <label>需補商品 / 備品 / 異常事項</label>
             <textarea name="restock" rows="2" placeholder="豹紋紙袋夠嗎？是否有東西需要維修？"></textarea>
 
@@ -191,7 +200,7 @@
         </div>
         
         <footer class="text-center mt-10 pb-10 text-pink-400 text-sm">
-            ZC Performance System v2.3 • 精準條列優化版
+            ZC Performance System v2.7 • 新增課程訓練欄位
         </footer>
     </div>
 
@@ -287,6 +296,7 @@
             report += `《 個人績效明細 💃 》\n${perfText}\n`;
             report += `《 門店現況分析 📝 》\n${data.get('analysis') || '無'}\n\n`;
             report += `《 今日熱銷排名 🔥 》\n${hotItems || '無'}\n`;
+            report += `《 課程訓練進度 🎓 》\n${data.get('training_progress') || '無'}\n\n`;
             report += `《 補貨與異常 ⚠️ 》\n${data.get('restock') || '無'}\n\n`;
             report += `《 老闆 ALY 反映 💼 》\n${data.get('feedback_aly') || '無'}\n\n`;
             report += `《 團隊 Rita 反映 👑 》\n${data.get('feedback_rita') || '無'}\n`;
