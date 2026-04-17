@@ -154,8 +154,8 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 md:mb-0">
-                    <label class="text-blue-700">給明天開班或自己的話 📋</label>
-                    <textarea name="to_next_shift" rows="3" placeholder="陳列倉儲擺哪裡，明天人台跟你穿甚麼好...啥沒做完還有打打氣!團隊才會旺"></textarea>
+                    <label class="text-blue-700">給明天開班人員或自己的話 📋</label>
+                    <textarea name="to_next_shift" rows="3" placeholder="陳列倉儲那些還沒有用完，明天預計穿甚麼...啥沒做完還有打打氣!團隊才會旺"></textarea>
                 </div>
                 <div class="bg-green-50 p-4 rounded-2xl border border-green-100">
                     <label class="text-green-700">給總部倉儲採購建議 📦</label>
@@ -284,9 +284,9 @@
             report += `《 工作進度回報 📅 》\n${progressText}\n`;
             report += `《 今日門市狀況與顧客分析回報 📝 》\n${data.get('analysis') || '無'}\n\n`;
             report += `《 今日熱銷排名 🔥 》\n${hotItems || '無'}\n`;
-            report += `《 給明天開班的話 📋 》\n${data.get('to_next_shift') || '無'}\n\n`;
+            report += `《 給明天開班人員備註 📋 》\n${data.get('to_next_shift') || '無'}\n\n`;
             report += `《 給總部倉儲建議 📦 》\n${data.get('to_hq_warehouse') || '無'}\n\n`;
-            report += `《 給Rita 反饋 👑 》\n${data.get('feedback_rita') || '無'}\n`;
+            report += `《 給Rita的回報 》\n${data.get('feedback_rita') || '無'}\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
             report += `💕 ${cheer.split('！')[0]}！辛苦了！今天有你真好~千萬別忘記服務先行業績隨行,讓我們一起致力於滿足顧客需求`;
 
