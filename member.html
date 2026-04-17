@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZC 夥伴個人日誌</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); 
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
+            min-height: 100vh;
+        }
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 24px; 
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
+            backdrop-filter: blur(8px);
+        }
+        label { font-weight: 600; color: #1e40af; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px; }
+        input, select, textarea { 
+            width: 100%; padding: 0.85rem; border: 1.5px solid #bfdbfe; border-radius: 14px; margin-bottom: 1rem; font-size: 16px;
+            transition: all 0.2s; background-color: white;
+        }
+        input:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+        .section-title { 
+            display: flex; align-items: center; gap: 8px;
+            margin: 2rem 0 1.2rem 0; font-size: 1.25rem; font-weight: 800; color: #1d4ed8; 
+        }
+        .tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+        .tag-item { 
+            padding: 6px 12px; border-radius: 20px; border: 1px solid #bfdbfe; 
+            font-size: 14px; cursor: pointer; transition: 0.2s; background: white;
+        }
+        .tag-item.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+        #loadingOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; align-items: center; justify-content: center; color: white; flex-direction: column; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div id="loadingOverlay">
+        <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>
+        <p class="font-bold text-xl text-white">正在傳送你的日誌 ✨</p>
+    </div>
+
+    <div class="max-w-3xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-blue-900 tracking-tight">ZC 夥伴個人日誌 🖊️</h1>
+            <p class="text-blue-600 font-medium mt-2">記錄你的精彩銷售瞬間，分享顧客的故事</p>
+        </header>
+
+        <form id="memberForm" class="card p-6 md:p-10 mb-8">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label>你是哪位夥伴？</label>
+                    <input type="text" name="staff_name" placeholder="請輸入姓名" required>
+                </div>
+                <div>
+                    <label>今日上班門市</label>
+                    <select name="store_name" required>
+                        <option value="中山門市">🏛️ 中山門市</option>
+                        <option value="中原門市">🏡 中原門市</option>
+                        <option value="新竹門市">🚄 新竹門市</option>
+                        <option value="台北中心">📦 台北中心</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-title"><span>🛠️</span> 今日協助店務</div>
+            <textarea name="task_done" rows="2" placeholder="今天除了銷售，還幫忙完成了哪些店務？(如：整理排桿、進貨處理...)"></textarea>
+
+            <div class="section-title"><span>👗</span> 今日穿搭表現</div>
+            <label>今天身上穿的貨號是？</label>
+            <input type="text" name="staff_outfit" placeholder="請填寫貨號">
+            <label>身上這套今天被客人詢問嗎？</label>
+            <select name="outfit_asked">
+                <option value="很有感！被問很多次">🔥 很有感！被問很多次</option>
+                <option value="有，客人覺得不錯">👍 有，客人覺得不錯</option>
+                <option value="普通，沒特別被注意到">😐 普通，沒特別被注意到</option>
+            </select>
+
+            <div class="section-title"><span>🤝</span> 服務與銷售分享</div>
+            <label>今天提供的服務類型？(多選)</label>
+            <div class="tag-group" id="serviceTags">
+                <span class="tag-item">穿搭建議</span>
+                <span class="tag-item">色系挑選</span>
+                <span class="tag-item">送禮推薦</span>
+                <span class="tag-item">VIP維護</span>
+                <span class="tag-item">修改建議</span>
+                <span class="tag-item">尺寸諮詢</span>
+            </div>
+            <input type="hidden" name="service_types" id="service_types_input">
+
+            <label>分享今天一次成功的銷售經驗？</label>
+            <textarea name="success_story" rows="3" placeholder="客人原本猶豫什麼？你怎麼推坑成功的？"></textarea>
+
+            <div class="section-title"><span>🔍</span> 顧客在想什麼？</div>
+            <label>今天顧客一直在問的是什麼？</label>
+            <textarea name="customer_ask" rows="2" placeholder="特定的款式？某種顏色？還是什麼樣的場合穿搭？"></textarea>
+            
+            <label>今天印象最深刻的一位客人/有趣的事？</label>
+            <textarea name="customer_story" rows="2" placeholder="有趣的對話或是感人的故事..."></textarea>
+
+            <div class="section-title"><span>💌</span> 給團隊的反饋 (私房話)</div>
+            <div class="space-y-4">
+                <div class="bg-pink-50 p-4 rounded-2xl border border-pink-100">
+                    <label class="text-pink-700">想對 RITA 說的話 💝</label>
+                    <textarea name="to_rita" rows="2" placeholder="關於產品靈感、店櫃氣氛..."></textarea>
+                </div>
+                <div class="bg-green-50 p-4 rounded-2xl border border-green-100">
+                    <label class="text-green-700">想給公司採購的話 📦</label>
+                    <textarea name="to_buying" rows="2" placeholder="客人反映的顏色/版型問題..."></textarea>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                    <label class="text-blue-700">想給公司倉儲的話 🚚</label>
+                    <textarea name="to_warehouse" rows="2" placeholder="補貨速度、包裝建議..."></textarea>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-xl mt-8 hover:bg-blue-700 transition">送出我的今日日誌 🚀</button>
+        </form>
+
+        <div id="resultContainer" class="card p-6 md:p-8 hidden">
+            <h2 class="text-xl font-bold mb-4 text-blue-800 flex justify-between">
+                <span>📋 LINE 回報草稿</span>
+                <button onclick="copyToClipboard()" class="text-sm bg-blue-600 text-white px-4 py-1 rounded-full">複製文字</button>
+            </h2>
+            <pre id="resultText" class="whitespace-pre-wrap bg-blue-50 p-6 rounded-2xl text-gray-700 text-sm leading-relaxed border border-blue-100"></pre>
+        </div>
+    </div>
+
+    <script>
+        // 請替換成你的 Google Apps Script 網址
+        const scriptURL = 'https://script.google.com/macros/s/你的網址/exec'; 
+
+        // 多選標籤邏輯
+        const tags = document.querySelectorAll('.tag-item');
+        const hiddenInput = document.getElementById('service_types_input');
+        let selectedTags = [];
+
+        tags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('active');
+                const val = tag.innerText;
+                if (selectedTags.includes(val)) {
+                    selectedTags = selectedTags.filter(t => t !== val);
+                } else {
+                    selectedTags.push(val);
+                }
+                hiddenInput.value = selectedTags.join(', ');
+            });
+        });
+
+        const form = document.getElementById('memberForm');
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: new FormData(form)})
+            .then(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                generatePreview();
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('loadingOverlay').style.display = 'none';
+                generatePreview();
+            });
+        });
+
+        function generatePreview() {
+            const data = new FormData(form);
+            let report = `📝 《ZC 夥伴個人日誌》\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `👤 夥伴：${data.get('staff_name')}\n`;
+            report += `📍 門市：${data.get('store_name')}\n`;
+            report += `🛠️ 協助店務：${data.get('task_done') || '無'}\n\n`;
+            
+            report += `《 穿搭表現 👗 》\n`;
+            report += `🧥 今日穿搭：${data.get('staff_outfit') || '未填'}\n`;
+            report += `💬 被詢問度：${data.get('outfit_asked')}\n\n`;
+
+            report += `《 服務與銷售 🤝 》\n`;
+            report += `✅ 服務類型：${data.get('service_types') || '無'}\n`;
+            report += `🌟 成功經驗：${data.get('success_story') || '無'}\n\n`;
+
+            report += `《 顧客洞察 🔍 》\n`;
+            report += `❓ 顧客頻繁詢問：${data.get('customer_ask') || '無'}\n`;
+            report += `😮 印象深刻的事：${data.get('customer_story') || '無'}\n\n`;
+
+            report += `《 給團隊的反饋 💌 》\n`;
+            if(data.get('to_rita')) report += `💝 給Rita：${data.get('to_rita')}\n`;
+            if(data.get('to_buying')) report += `📦 給採購：${data.get('to_buying')}\n`;
+            if(data.get('to_warehouse')) report += `🚚 給倉儲：${data.get('to_warehouse')}\n`;
+            
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `✨ 今天也辛苦了，謝謝你的努力！`;
+
+            document.getElementById('resultText').innerText = report;
+            document.getElementById('resultContainer').classList.remove('hidden');
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('resultText').innerText;
+            const el = document.createElement('textarea');
+            el.value = text; document.body.appendChild(el); el.select();
+            document.execCommand('copy'); document.body.removeChild(el);
+            alert('已複製到剪貼簿，可以去 LINE 發給 Rita 囉！');
+        }
+    </script>
+</body>
+</html>
