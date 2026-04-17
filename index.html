@@ -112,21 +112,8 @@
                 <div class="perf-row staff-group">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
                         <div>
-                            <label>銷售人員</label>
-                            <select name="staff_name[]" class="staff-select" required>
-                                <option value="">選人員</option>
-                                <optgroup label="中山店">
-                                    <option value="庭庭 zctt">庭庭 zctt</option>
-                                    <option value="PINGU">PINGU</option>
-                                    <option value="小杜 zcdo">小杜 zcdo</option>
-                                    <option value="Reina zcre">Reina zcre</option>
-                                </optgroup>
-                                <optgroup label="新竹店">
-                                    <option value="安安 ">安安 </option>
-                                    <option value="PT zcpt5">PT zcpt5</option>
-                                    <option value="萱萱 zcpt6">萱萱 zcpt6</option>
-                                </optgroup>
-                            </select>
+                            <label>回報人員姓名</label>
+                            <input type="text" name="staff_name[]" placeholder="請輸入姓名" required>
                         </div>
                         <div>
                             <label>店務完成狀態</label>
@@ -211,12 +198,11 @@
 
         function addStaff() {
             const container = document.getElementById('staffContainer');
-            const sourceSelect = document.querySelector('.staff-select');
             const div = document.createElement('div');
             div.className = 'perf-row staff-group animate-in fade-in slide-in-from-right-4 duration-300';
             div.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                    <div><label>銷售人員</label><select name="staff_name[]" class="staff-select">${sourceSelect.innerHTML}</select></div>
+                    <div><label>回報人員姓名</label><input type="text" name="staff_name[]" placeholder="請輸入姓名" required></div>
                     <div>
                         <label>店務完成狀態</label>
                         <select name="task_status[]" onchange="toggleTaskNote(this)">
@@ -230,7 +216,7 @@
                     <label>未完成事項備註</label>
                     <textarea name="task_note[]" rows="2" placeholder="請列出未完成的店務項目..."></textarea>
                 </div>
-                <div><label>補充備品 / 報修狀況</label><input type="text" name="maintenance[]" placeholder="如：袋子不夠來多少發票不足、燈泡故障..."></div>
+                <div><label>補充備品 / 報修狀況</label><input type="text" name="maintenance[]" placeholder="如：衣架不足、燈泡故障..."></div>
                 <button type="button" onclick="this.parentElement.remove()" class="absolute top-4 right-4 text-gray-300 hover:text-red-400">✕</button>
             `;
             container.appendChild(div);
@@ -295,14 +281,14 @@
             report += `📦 總件/筆數：${items} / ${orders}\n`;
             report += `📈 UPT 平均件數：${upt} (${upt >= 2.41 ? '達標' : '待努力'})\n`;
             report += `💎 全店 VIP 開發：${data.get('total_vip_all')}\n\n`;
-            report += `《 人員工作進度 📅 》\n${progressText}\n`;
-            report += `《 今日工作分析與回饋 📝 》\n${data.get('analysis') || '無'}\n\n`;
+            report += `《 工作進度回報 📅 》\n${progressText}\n`;
+            report += `《 今日門市狀況與顧客分析回報 📝 》\n${data.get('analysis') || '無'}\n\n`;
             report += `《 今日熱銷排名 🔥 》\n${hotItems || '無'}\n`;
             report += `《 給明天開班的話 📋 》\n${data.get('to_next_shift') || '無'}\n\n`;
             report += `《 給總部倉儲建議 📦 》\n${data.get('to_hq_warehouse') || '無'}\n\n`;
             report += `《 給Rita 反饋 👑 》\n${data.get('feedback_rita') || '無'}\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
-            report += `💕 ${cheer.split('！')[0]}！辛苦了！今日有你真好,也再次提醒~服務先行業績隨行~滿足顧客的需求是我們最優先的目標`;
+            report += `💕 ${cheer.split('！')[0]}！辛苦了！今天有你真好~千萬別忘記服務先行業績隨行,讓我們一起致力於滿足顧客需求`;
 
             document.getElementById('resultText').innerText = report;
             document.getElementById('resultContainer').classList.remove('hidden');
