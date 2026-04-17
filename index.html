@@ -155,11 +155,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 md:mb-0">
                     <label class="text-blue-700">給明天開班人員的話 📋</label>
-                    <textarea name="to_next_shift" rows="3" placeholder="陳列/倉儲/待辦事項..."></textarea>
+                    <textarea name="to_next_shift" rows="3" placeholder="陳列差甚麼/倉儲擺哪裡/等待辦事項...還有打打氣!團隊才會旺"></textarea>
                 </div>
                 <div class="bg-green-50 p-4 rounded-2xl border border-green-100">
                     <label class="text-green-700">給總部倉儲採購建議 📦</label>
-                    <textarea name="to_hq_warehouse" rows="3" placeholder="補貨/品質/配貨建議..."></textarea>
+                    <textarea name="to_hq_warehouse" rows="3" placeholder="補貨/品質/配貨建議...什麼搞錯~什麼快來~什麼賣鉤來r"></textarea>
                 </div>
             </div>
             <div class="mt-4">
@@ -211,12 +211,12 @@
                         </select>
                     </div>
                 </div>
-                <div class="reminder-box">💡 提醒：音樂 / 整潔 / 芬香 / 陳列 / 庫存 / 人台 / 穿搭</div>
+                <div class="reminder-box">💡 提醒：音樂 / 整潔 / 芬香 / 陳列 / 庫存 / 人台 / 穿搭 / 備品回報 / 零錢</div>
                 <div class="task-note-area" style="display:none">
                     <label>未完成事項備註</label>
                     <textarea name="task_note[]" rows="2" placeholder="請列出未完成的店務項目..."></textarea>
                 </div>
-                <div><label>補充備品 / 報修狀況</label><input type="text" name="maintenance[]" placeholder="如：衣架不足、燈泡故障..."></div>
+                <div><label>補充備品 / 報修狀況</label><input type="text" name="maintenance[]" placeholder="如：發票不足、袋子補多少..."></div>
                 <button type="button" onclick="this.parentElement.remove()" class="absolute top-4 right-4 text-gray-300 hover:text-red-400">✕</button>
             `;
             container.appendChild(div);
@@ -245,7 +245,7 @@
 
             let cheer = "";
             let color = "text-pink-600";
-            if (upt < 2.4) { cheer = "🚀 目前 UPT 待努力，請加油！多多推廣連帶搭配喔！"; }
+            if (upt < 2.4) { cheer = "🚀 目前 UPT 待努力，請加油！多多推廣+1搭配或是去跟顧客聊聊天"; }
             else if (upt <= 2.79) { cheer = "✅ 恭喜達標！今天的銷售節奏很棒喔！"; }
             else { cheer = "👑 強強強！全台灣今天你最厲害！UPT 破 3 啦！"; color = "text-red-600"; }
 
@@ -279,7 +279,7 @@
             report += `📅 日期：${data.get('date')} (${data.get('weekday')})\n`;
             report += `👥 進店人流：${data.get('visitor_count')} 人\n`;
             report += `📦 總件/筆數：${items} / ${orders}\n`;
-            report += `📈 UPT 平均件數：${upt} (${upt >= 2.41 ? '達標' : '待努力'})\n`;
+            report += `📈 UPT 平均件數：${upt} (${upt >= 2.41 ? '達標' : '再努力看看'})\n`;
             report += `💎 全店 VIP 開發：${data.get('total_vip_all')}\n\n`;
             report += `《 工作進度回報 📅 》\n${progressText}\n`;
             report += `《 今日門市狀況與顧客分析回報 📝 》\n${data.get('analysis') || '無'}\n\n`;
