@@ -101,4 +101,223 @@
             </div>
 
             <div class="section-title"><span>📊</span> 今日數據總計</div>
-            <div class="grid grid-cols-1 md:grid-cols-
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div><label>總件數 🧺</label><input type="number" name="total_items" id="total_items" required placeholder="件"></div>
+                <div><label>總筆數 🧾</label><input type="number" name="total_orders" id="total_orders" required placeholder="筆"></div>
+                <div><label>全店新增 VIP 💎</label><input type="number" name="total_vip_all" value="0"></div>
+            </div>
+
+            <div class="section-title"><span>📅</span> 人員工作進度</div>
+            <div id="staffContainer">
+                <div class="perf-row staff-group">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                        <div>
+                            <label>銷售人員</label>
+                            <select name="staff_name[]" class="staff-select" required>
+                                <option value="">選人員</option>
+                                <optgroup label="中山店">
+                                    <option value="庭庭 zctt">庭庭 zctt</option>
+                                    <option value="PINGU">PINGU</option>
+                                    <option value="小杜 zcdo">小杜 zcdo</option>
+                                    <option value="Reina zcre">Reina zcre</option>
+                                </optgroup>
+                                <optgroup label="新竹店">
+                                    <option value="安安 ">安安 </option>
+                                    <option value="PT zcpt5">PT zcpt5</option>
+                                    <option value="萱萱 zcpt6">萱萱 zcpt6</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div>
+                            <label>店務完成狀態</label>
+                            <select name="task_status[]" onchange="toggleTaskNote(this)" required>
+                                <option value="完成">✅ 全部完成</option>
+                                <option value="部分完成">⚠️ 部分完成 (請備註)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="reminder-box">
+                        💡 提醒：音樂 / 整潔 / 芬香 / 陳列 / 庫存 / 人台 / 穿搭
+                    </div>
+
+                    <div class="task-note-area" style="display:none">
+                        <label>未完成事項備註</label>
+                        <textarea name="task_note[]" rows="2" placeholder="請列出未完成的店務項目..."></textarea>
+                    </div>
+
+                    <div>
+                        <label>補充備品 / 報修狀況</label>
+                        <input type="text" name="maintenance[]" placeholder="如：衣架不足、燈泡故障...">
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="addStaff()" class="text-pink-600 font-bold mb-6 hover:text-pink-700">＋ 新增人員進度</button>
+
+            <div class="section-title"><span>✍️</span> 今日工作分析與回饋</div>
+            <label>門店現況分析</label>
+            <textarea name="analysis" rows="3" placeholder="今天店裡有什麼從數據看不到的事？"></textarea>
+            
+            <label>今日熱銷排名 (Top 3)</label>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+                <input type="text" name="hot_item_1" placeholder="1. 貨號">
+                <input type="text" name="hot_item_2" placeholder="2. 貨號">
+                <input type="text" name="hot_item_3" placeholder="3. 貨號">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 md:mb-0">
+                    <label class="text-blue-700">給明天開班人員的話 📋</label>
+                    <textarea name="to_next_shift" rows="3" placeholder="陳列/倉儲/待辦事項..."></textarea>
+                </div>
+                <div class="bg-green-50 p-4 rounded-2xl border border-green-100">
+                    <label class="text-green-700">給總部倉儲採購建議 📦</label>
+                    <textarea name="to_hq_warehouse" rows="3" placeholder="補貨/品質/配貨建議..."></textarea>
+                </div>
+            </div>
+            <div class="mt-4">
+                <label class="text-purple-700">Rita 反饋 👑</label>
+                <textarea name="feedback_rita" rows="2" placeholder="產品反饋..."></textarea>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-5 mt-8">
+                <button type="submit" id="submitBtn" class="btn-primary flex-1 text-white font-bold py-5 rounded-2xl shadow-xl">完成並送出數據 🚀</button>
+                <button type="button" onclick="generatePreview()" class="flex-1 bg-gray-100 text-gray-700 font-bold py-5 rounded-2xl hover:bg-gray-200 transition">僅預覽 LINE 文字 📄</button>
+            </div>
+        </form>
+
+        <div id="resultContainer" class="card p-6 md:p-8 hidden">
+            <h2 class="text-2xl font-bold mb-5 flex justify-between items-center text-pink-700">
+                <span>📋 回報摘要預覽</span>
+                <button onclick="copyToClipboard()" class="text-sm bg-pink-600 text-white px-5 py-2 rounded-full hover:bg-pink-700">複製整份報告</button>
+            </h2>
+            <div id="uptAlert" class="upt-box mb-6 font-bold text-xl text-pink-600 hidden"></div>
+            <pre id="resultText" class="whitespace-pre-wrap bg-pink-50/50 p-6 rounded-2xl border border-pink-100 text-gray-700 text-sm leading-relaxed"></pre>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycby9QLEMRA_wJUFImeJqNyN-GXkNpFim1MYuPHCCy-HJctbUvHpnpVqVpKVkcuymu8kJhA/exec'; 
+
+        document.getElementById('date').valueAsDate = new Date();
+        const dayMap = ['日','一','二','三','四','五','六'];
+        document.getElementById('weekday').value = dayMap[new Date().getDay()];
+
+        function toggleTaskNote(el) {
+            const row = el.closest('.staff-group');
+            const noteArea = row.querySelector('.task-note-area');
+            noteArea.style.display = el.value === '部分完成' ? 'block' : 'none';
+        }
+
+        function addStaff() {
+            const container = document.getElementById('staffContainer');
+            const sourceSelect = document.querySelector('.staff-select');
+            const div = document.createElement('div');
+            div.className = 'perf-row staff-group animate-in fade-in slide-in-from-right-4 duration-300';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                    <div><label>銷售人員</label><select name="staff_name[]" class="staff-select">${sourceSelect.innerHTML}</select></div>
+                    <div>
+                        <label>店務完成狀態</label>
+                        <select name="task_status[]" onchange="toggleTaskNote(this)">
+                            <option value="完成">✅ 全部完成</option>
+                            <option value="部分完成">⚠️ 部分完成 (請備註)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="reminder-box">💡 提醒：音樂 / 整潔 / 芬香 / 陳列 / 庫存 / 人台 / 穿搭</div>
+                <div class="task-note-area" style="display:none">
+                    <label>未完成事項備註</label>
+                    <textarea name="task_note[]" rows="2" placeholder="請列出未完成的店務項目..."></textarea>
+                </div>
+                <div><label>補充備品 / 報修狀況</label><input type="text" name="maintenance[]" placeholder="如：袋子不夠來多少發票不足、燈泡故障..."></div>
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-4 right-4 text-gray-300 hover:text-red-400">✕</button>
+            `;
+            container.appendChild(div);
+        }
+
+        const form = document.getElementById('storeForm');
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: new FormData(form)})
+            .then(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                generatePreview();
+            })
+            .catch(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                generatePreview();
+            });
+        });
+
+        function generatePreview() {
+            const data = new FormData(form);
+            const items = parseFloat(data.get('total_items')) || 0;
+            const orders = parseFloat(data.get('total_orders')) || 0;
+            const upt = orders > 0 ? (items / orders).toFixed(2) : 0;
+
+            let cheer = "";
+            let color = "text-pink-600";
+            if (upt < 2.4) { cheer = "🚀 目前 UPT 待努力，請加油！多多推廣連帶搭配喔！"; }
+            else if (upt <= 2.79) { cheer = "✅ 恭喜達標！今天的銷售節奏很棒喔！"; }
+            else { cheer = "👑 強強強！全台灣今天你最厲害！UPT 破 3 啦！"; color = "text-red-600"; }
+
+            const uptAlert = document.getElementById('uptAlert');
+            uptAlert.innerText = cheer;
+            uptAlert.className = `upt-box mb-6 font-bold text-xl ${color}`;
+            uptAlert.classList.remove('hidden');
+
+            const names = data.getAll('staff_name[]');
+            const statuses = data.getAll('task_status[]');
+            const notes = data.getAll('task_note[]');
+            const mains = data.getAll('maintenance[]');
+            
+            let progressText = "";
+            names.forEach((n, i) => { 
+                if(n) {
+                    progressText += `・${n}: [${statuses[i]}]\n`; 
+                    if(statuses[i] === '部分完成') progressText += `  └ ⚠️ 未完成: ${notes[i] || '未填'}\n`;
+                    if(mains[i]) progressText += `  └ 🔧 報修/備品: ${mains[i]}\n`;
+                }
+            });
+
+            let hotItems = "";
+            for(let i=1; i<=3; i++) {
+                const item = data.get(`hot_item_${i}`);
+                if(item) hotItems += `${i}. ${item}\n`;
+            }
+
+            let report = `✨ 《${data.get('store_name')}》工作進度回報 ✨\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `📅 日期：${data.get('date')} (${data.get('weekday')})\n`;
+            report += `👥 進店人流：${data.get('visitor_count')} 人\n`;
+            report += `📦 總件/筆數：${items} / ${orders}\n`;
+            report += `📈 UPT 平均件數：${upt} (${upt >= 2.41 ? '達標' : '待努力'})\n`;
+            report += `💎 全店 VIP 開發：${data.get('total_vip_all')}\n\n`;
+            report += `《 人員工作進度 📅 》\n${progressText}\n`;
+            report += `《 今日工作分析與回饋 📝 》\n${data.get('analysis') || '無'}\n\n`;
+            report += `《 今日熱銷排名 🔥 》\n${hotItems || '無'}\n`;
+            report += `《 給明天開班的話 📋 》\n${data.get('to_next_shift') || '無'}\n\n`;
+            report += `《 給總部倉儲建議 📦 》\n${data.get('to_hq_warehouse') || '無'}\n\n`;
+            report += `《 給Rita 反饋 👑 》\n${data.get('feedback_rita') || '無'}\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `💕 ${cheer.split('！')[0]}！辛苦了！今日有你真好`;
+
+            document.getElementById('resultText').innerText = report;
+            document.getElementById('resultContainer').classList.remove('hidden');
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('resultText').innerText;
+            const el = document.createElement('textarea');
+            el.value = text; document.body.appendChild(el); el.select();
+            document.execCommand('copy'); document.body.removeChild(el);
+            const btn = event.target;
+            btn.innerText = "✅ 已複製報告！";
+            setTimeout(() => { btn.innerText = "複製整份報告"; }, 2000);
+        }
+    </script>
+</body>
+</html>
