@@ -66,7 +66,7 @@
     <div class="max-w-4xl mx-auto">
         <header class="text-center mb-10">
             <h1 class="text-4xl font-extrabold text-gray-800 tracking-tight">《ZC》門市績效系統 🎀</h1>
-            <p class="text-pink-600 font-medium mt-2">辛苦了！追求 UPT > 3 的路上我們一起努力 🚀</p>
+            <p class="text-pink-600 font-medium mt-2">辛苦了！在成為各商圈生意最好的路上讓我們一起達成🚀</p>
         </header>
 
         <div class="flex justify-end mb-4">
@@ -245,8 +245,8 @@
 
             let cheer = "";
             let color = "text-pink-600";
-            if (upt < 2.4) { cheer = "🚀 目前 UPT 待努力，請加油！多多推廣+1搭配或是去跟顧客聊聊天"; }
-            else if (upt <= 2.79) { cheer = "✅ 恭喜達標！今天的銷售節奏很棒喔！"; }
+            if (upt < 2.49) { cheer = "🚀 加油！多多推廣+1搭配或是服務顧客甚至可以在社群多多發揮"; }
+            else if (upt <= 2.5) { cheer = "✅ 恭喜達標！今天的銷售節奏很棒喔！"; }
             else { cheer = "👑 強強強！全台灣今天你最厲害！UPT 破 3 啦！"; color = "text-red-600"; }
 
             const uptAlert = document.getElementById('uptAlert');
@@ -285,8 +285,8 @@
             report += `《 今日門市狀況與顧客分析回報 📝 》\n${data.get('analysis') || '無'}\n\n`;
             report += `《 今日熱銷排名 🔥 》\n${hotItems || '無'}\n`;
             report += `《 給明天開班人員備註 📋 》\n${data.get('to_next_shift') || '無'}\n\n`;
-            report += `《 給總部倉儲建議 📦 》\n${data.get('to_hq_warehouse') || '無'}\n\n`;
-            report += `《 給Rita的回報 》\n${data.get('feedback_rita') || '無'}\n`;
+            report += `《 給總部倉儲及主管建議 📦 》\n${data.get('to_hq_warehouse') || '無'}\n\n`;
+            report += `《 給老闆的反饋 》\n${data.get('feedback_rita') || '無'}\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
             report += `💕 ${cheer.split('！')[0]}！辛苦了！今天有你真好~千萬別忘記服務先行業績隨行,讓我們一起致力於滿足顧客需求`;
 
