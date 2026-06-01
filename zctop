@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZC 門市主管每日績效、人資與巡店決策系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%); 
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+        }
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 24px; 
+            box-shadow: 0 10px 25px -5px rgba(51, 65, 85, 0.1), 0 8px 10px -6px rgba(51, 65, 85, 0.1);
+            backdrop-filter: blur(8px);
+        }
+        label { font-weight: 600; color: #334155; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 4px; font-size: 14px; }
+        input, select, textarea { 
+            width: 100%; padding: 0.75rem; border: 1.5px solid #cbd5e1; border-radius: 12px; margin-bottom: 1rem; font-size: 16px;
+            transition: all 0.2s; background-color: white; color: #1e293b;
+        }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); transform: translateY(-1px); }
+        .section-title { 
+            display: flex; align-items: center; gap: 8px;
+            margin: 2rem 0 1.2rem 0; font-size: 1.25rem; font-weight: 800; color: #1e3a8a; border-left: 4px solid #3b82f6; padding-left: 8px;
+        }
+        .store-row, .hr-row { 
+            background: linear-gradient(to right, #ffffff, #f8fafc); 
+            padding: 1.5rem; border-radius: 20px; margin-bottom: 1.2rem; 
+            border: 1px solid #e2e8f0;
+        }
+        .hr-row { background: linear-gradient(to right, #ffffff, #f5f3ff); border-color: #ddd6fe; }
+        .quote-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-left: 5px solid #3b82f6;
+            color: #1e40af; padding: 1rem; border-radius: 16px; margin-bottom: 1.5rem; font-size: 0.95rem;
+        }
+        #loadingOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; align-items: center; justify-content: center; color: white; flex-direction: column; backdrop-filter: blur(4px); }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4); }
+        .google-sheet-btn {
+            background: #10b981; color: white; padding: 10px 20px; border-radius: 12px; font-weight: bold;
+            display: inline-flex; align-items: center; gap: 8px; margin-bottom: 1rem; transition: all 0.2s;
+        }
+        /* 訂製多選框樣式 */
+        .checkbox-container {
+            display: flex; align-items: flex-start; gap: 12px; background: #fff; padding: 12px 16px; 
+            border: 1.5px solid #e2e8f0; border-radius: 14px; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s;
+        }
+        .checkbox-container:hover { border-color: #3b82f6; background: #f8fafc; }
+        .checkbox-container input[type="checkbox"] {
+            width: 20px; height: 20px; margin-bottom: 0; cursor: pointer; accent-color: #3b82f6; flex-shrink: 0; margin-top: 2px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div id="loadingOverlay">
+        <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mb-4"></div>
+        <p class="font-bold text-xl text-white">正在同步主管數據中 ✨</p>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold text-gray-800 tracking-tight">《ZC》門市主管每日營運與人資決策系統 👑</h1>
+            <p class="text-blue-700 font-medium mt-2">優秀的主管專注兩件事：業績成長，以及永不間斷的人才梯隊建設！</p>
+        </header>
+
+        <div class="quote-box shadow-sm">
+            <p class="font-bold mb-1">💡 主管每日核心心法：</p>
+            <ul class="list-disc list-inside space-y-1 text-sm">
+                <li>先處理心情，才能處理好事情；先討論好心情，才能討論好事情。</li>
+                <li>只有指令與監督的叫做管理，若有獎勵與福利的叫做領導。</li>
+                <li><b>人力資源是主管最重要的事情</b>。隨時掌握面試、試上、聯繫進度，主動爭取優秀人才！</li>
+            </ul>
+        </div>
+
+        <div class="flex justify-end mb-4">
+            <a href="https://docs.google.com/spreadsheets/d/1O0z1I6v_wXQY0t_WclN89pDOfL4O60p8gUuO924M6V4/edit" target="_blank" class="google-sheet-btn shadow-lg text-sm">
+                📊 查看後端數據決策表
+            </a>
+        </div>
+
+        <form id="managerForm" class="card p-6 md:p-10 mb-8">
+            <div class="section-title"><span>📍</span> 基本資訊</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div><label>回報主管姓名</label><input type="text" name="manager_name" placeholder="請輸入姓名" required></div>
+                <div><label>日期</label><input type="date" name="date" id="date" required></div>
+                <div>
+                    <label>今日天氣</label>
+                    <select name="weather" id="weather" required>
+                        <option value="☀️ 晴天">☀️ 晴天</option>
+                        <option value="☁️ 陰天">☁️ 陰天</option>
+                        <option value="🌧️ 雨天">🌧️ 雨天</option>
+                        <option value="🥶 寒流/暴雨">🥶 寒流/暴雨</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-2">
+                <div class="md:col-span-1">
+                    <label>今日現場指導店別 🏃‍♂️</label>
+                    <select name="guidance_store" required>
+                        <option value="🏢 總部 / 未巡店">🏢 總部 / 未巡店</option>
+                        <option value="🏛️ 中山店">🏛️ 中山店</option>
+                        <option value="🛍️ 南西店">🛍️ 南西店</option>
+                        <option value="🏛️ 中山店 + 🛍️ 南西店">🏛️ 中山店 + 🛍️ 南西店</option>
+                        <option value="🏡 中原店">🏡 中原店</option>
+                        <option value="🚄 新竹店">🚄 新竹店</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label>今日核心工作項目與指導紀要</label>
+                    <input type="text" name="today_work_items" placeholder="請精煉填寫今日完成的核心工作項目或店員指導重點" required>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 p-4 border border-blue-200 rounded-2xl mb-6 mt-2">
+                <p class="font-bold text-sm text-blue-900 mb-3">⚡ 主管每日核心管理檢核（必做）：</p>
+                
+                <label class="checkbox-container">
+                    <input type="checkbox" name="chk_store_ontime" value="Y" required>
+                    <span class="text-sm text-slate-700 font-medium">
+                        <b>今日各店都有準時檢查</b> <span class="text-xs text-gray-500">（已確認各分店開開店、陳列、衛生與人員準時到店）</span>
+                    </span>
+                </label>
+
+                <label class="checkbox-container">
+                    <input type="checkbox" name="chk_reports_read" value="Y" required>
+                    <span class="text-sm text-slate-700 font-medium">
+                        <b>昨日所有人員回報都有閱讀，以及必要回覆</b> <span class="text-xs text-gray-500">（已復盤同仁昨日問題，並給予對應的工作指導）</span>
+                    </span>
+                </label>
+            </div>
+
+            <div class="section-title"><span class="text-purple-600">🎯</span> 目前各店人力編制進度現況</div>
+            <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-3 rounded-xl border border-purple-200">
+                        <p class="font-bold text-purple-950 mb-2">🏛️ 中山 + 南西店</p>
+                        <p class="text-xs text-gray-500 mb-2">目標編制：6位正職 / 4位兼職</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="text-xs">現有正職 (人)</label><input type="number" name="current_ft_zs_nx" value="6" class="p-1 text-sm mb-0"></div>
+                            <div><label class="text-xs">現有兼職 (人)</label><input type="number" name="current_pt_zs_nx" value="4" class="p-1 text-sm mb-0"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-purple-200">
+                        <p class="font-bold text-purple-950 mb-2">🏡 中原店</p>
+                        <p class="text-xs text-gray-500 mb-2">請輸入目前現況</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="text-xs">現有正職 (人)</label><input type="number" name="current_ft_zy" value="0" class="p-1 text-sm mb-0"></div>
+                            <div><label class="text-xs">現有兼職 (人)</label><input type="number" name="current_pt_zy" value="0" class="p-1 text-sm mb-0"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-purple-200">
+                        <p class="font-bold text-purple-950 mb-2">🚄 新竹店</p>
+                        <p class="text-xs text-gray-500 mb-2">請輸入目前現況</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="text-xs">現有正職 (人)</label><input type="number" name="current_ft_hc" value="0" class="p-1 text-sm mb-0"></div>
+                            <div><label class="text-xs">現有兼職 (人)</label><input type="number" name="current_pt_hc" value="0" class="p-1 text-sm mb-0"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title"><span class="text-purple-600">👥</span> 本周招募動態進度（各分店）</div>
+            <div class="hr-row">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <h4 class="font-bold text-sm text-purple-900 border-b border-purple-200 pb-1">📋 本周面試人員數量</h4>
+                        <div><label class="text-xs">中山 + 南西</label><input type="number" name="hr_interview_zs_nx" value="0" class="p-2 text-sm mb-2"></div>
+                        <div><label class="text-xs">中原店</label><input type="number" name="hr_interview_zy" value="0" class="p-2 text-sm mb-2"></div>
+                        <div><label class="text-xs">新竹店</label><input type="number" name="hr_interview_hc" value="0" class="p-2 text-sm mb-0"></div>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="font-bold text-sm text-purple-900 border-b border-purple-200 pb-1">✨ 本周試上人員數量</h4>
+                        <div><label class="text-xs">中山 + 南西</label><input type="number" name="hr_trial_zs_nx" value="0" class="p-2 text-sm mb-2"></div>
+                        <div><label class="text-xs">中原店</label><input type="number" name="hr_trial_zy" value="0" class="p-2 text-sm mb-2"></div>
+                        <div><label class="text-xs">新竹店</label><input type="number" name="hr_trial_hc" value="0" class="p-2 text-sm mb-0"></div>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="font-bold text-sm text-purple-900 border-b border-purple-200 pb-1">💬 本周聯繫中人員數量</h4>
+                        <div><label class="text-xs">中山 + 南西</label><input type="number" name="hr_contact_zs_nx" value="0" class="p-2 text-sm mb-2"></div>
+                        <div><label class="text-xs">中原店</label><input type="number" name="hr_contact_zy" value="0" class="p-2 text-sm mb-2"></div>
+                        <div><label class="text-xs">新竹店</label><input type="number" name="hr_contact_hc" value="0" class="p-2 text-sm mb-0"></div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="text-purple-950 font-bold">招募備註 / 面試心得反饋</label>
+                    <input type="text" name="hr_remarks" placeholder="例如：中山店面試一位正職感覺很穩定、新竹店PT聯繫中預計週四試上...">
+                </div>
+            </div>
+
+            <div class="section-title"><span>🏛️</span> 各門市業績數據與店務缺失</div>
+            <p class="text-xs text-gray-500 mb-4">（系統將會自動依據「銷售件數 / 單數」精準計算各店 UPT）</p>
+            
+            <div id="storeDataContainer">
+                <div class="store-row" data-store="中山店">
+                    <h3 class="font-bold text-blue-800 mb-3 flex items-center gap-2">🏛️ 中山店</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label>總業績 (元)</label><input type="number" name="revenue_zhongshan" class="rev-input" value="0" required oninput="calculateTotal()"></div>
+                        <div><label>單數 (筆)</label><input type="number" name="orders_zhongshan" class="ord-input" value="0" required oninput="calculateTotal()"></div>
+                        <div><label>銷售件數 (件)</label><input type="number" name="items_zhongshan" class="itm-input" value="0" required oninput="calculateTotal()"></div>
+                    </div>
+                    <div class="mt-2">
+                        <label>店務缺失與異常事項處理</label>
+                        <input type="text" name="issues_zhongshan" placeholder="若無缺失請填「無」">
+                    </div>
+                </div>
+
+                <div class="store-row" data-store="南西店">
+                    <h3 class="font-bold text-blue-800 mb-3 flex items-center gap-2">🛍️ 南西店</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label>總業績 (元)</label><input type="number" name="revenue_nanxi" class="rev-input" value="0" required oninput="calculateTotal()"></div>
+                        <div><label>單數 (筆)</label><input type="number" name="orders_nanxi" class="ord-input" value="0" required oninput="calculateTotal()"></div>
+                        <div><label>銷售件數 (件)</label><input type="number" name="items_nanxi" class="itm-input" value="0" required oninput="calculateTotal()"></div>
+                    </div>
+                    <div class="mt-2">
+                        <label>店務缺失與異常事項處理</label>
+                        <input type="text" name="issues_nanxi" placeholder="若無缺失請填「無」">
+                    </div>
+                </div>
+
+                <div class="store-row" data-store="中原店">
+                    <h3 class="font-bold text-blue-800 mb-3 flex items-center gap-2">🏡 中原店</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label>總業績 (元)</label><input type="number" name="revenue_zhongyuan" class="rev-input" value="0" required oninput="calculateTotal()"></div>
+                        <div><label>單數 (筆)</label><input type="number" name="orders_zhongyuan" class="ord-input" value="0" required oninput="calculateTotal()"></div>
+                        <div><label>銷售件數 (件)</label><input type="number" name="items_zhongyuan" class="itm-input" value="0" required oninput="calculateTotal()"></div>
+                    </div>
+                    <div class="mt-2">
+                        <label>店務缺失與異常事項處理</label>
+                        <input type="text" name="issues_zhongyuan" placeholder="若無缺失請填「無」">
+                    </div>
+                </div>
+
+                <div class="store-row" data-store="新竹店">
+                    <h3 class="font-bold text-blue-800 mb-3 flex items-center gap-2">🚄 新竹店</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label>總業績 (元)</label><input type="number" name="revenue_hsinchu" class="rev-input" value="0" required oninput="calculateTotal()"></div>
+                        <div><label>單數 (筆)</label><input type="number" name="orders_hsinchu" class="ord-input" value="0" required oninput="calculateTotal()"></div>
+                        <div><label>銷售件數 (件)</label><input type="number" name="items_hsinchu" class="itm-input" value="0" required oninput="calculateTotal()"></div>
+                    </div>
+                    <div class="mt-2">
+                        <label>店務缺失與異常事項處理</label>
+                        <input type="text" name="issues_hsinchu" placeholder="若無缺失請填「無」">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-100 p-4 rounded-2xl mb-6 border border-slate-200">
+                <h4 class="font-bold text-sm text-slate-700 mb-2">📊 今日四店數據加總自動估算：</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="bg-white p-2 rounded-xl"><p class="text-xs text-gray-500">總業績</p><p id="calc_total_rev" class="text-lg font-bold text-blue-600">0 元</p></div>
+                    <div class="bg-white p-2 rounded-xl"><p class="text-xs text-gray-500">總單數</p><p id="calc_total_ord" class="text-lg font-bold text-slate-700">0 筆</p></div>
+                    <div class="bg-white p-2 rounded-xl"><p class="text-xs text-gray-500">總件數</p><p id="calc_total_itm" class="text-lg font-bold text-slate-700">0 件</p></div>
+                    <div class="bg-white p-2 rounded-xl"><p class="text-xs text-gray-500">綜合 UPT</p><p id="calc_total_upt" class="text-lg font-bold text-emerald-600">0.00</p></div>
+                </div>
+            </div>
+
+            <div class="section-title"><span>🎯</span> 其他經營指標項目</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label>今日全店新增 VIP 總數 💎</label>
+                    <input type="number" name="total_vip_count" value="0" required>
+                </div>
+                <div>
+                    <label>今日突發或重大異常處理說明</label>
+                    <input type="text" name="major_incident" placeholder="如無請填無">
+                </div>
+            </div>
+
+            <div class="section-title"><span>✍️</span> 營運分析與未來策略部署</div>
+            <div class="space-y-4">
+                <div>
+                    <label>今日四店營運宏觀分析 (從數據看不見的洞察)</label>
+                    <textarea name="macro_analysis" rows="3" placeholder="請針對今日各商圈人流、商品接受度、團隊氛圍進行深度解析..." required></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100">
+                        <label class="text-amber-800">💡 給各店長/同仁的指導與激勵方向</label>
+                        <textarea name="instruction_to_stores" rows="3" placeholder="明天預計如何佈局？如何協助未達標門市提升轉換與UPT？"></textarea>
+                    </div>
+                    <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
+                        <label class="text-indigo-800">👑 給老闆與總部的核心反饋與戰略建議</label>
+                        <textarea name="feedback_to_hq" rows="3" placeholder="需要採購端、倉儲端提供什麼樣的強力後援支援？"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-5 mt-8">
+                <button type="submit" id="submitBtn" class="btn-primary flex-1 text-white font-bold py-5 rounded-2xl shadow-xl text-lg">完成並同步數據 🚀</button>
+                <button type="button" onclick="generateManagerPreview()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-5 rounded-2xl hover:bg-gray-300 transition text-lg">僅預覽 LINE 文字 📄</button>
+            </div>
+        </form>
+
+        <div id="resultContainer" class="card p-6 md:p-8 hidden">
+            <h2 class="text-2xl font-bold mb-5 flex justify-between items-center text-blue-800">
+                <span>📋 主管決策報告摘要預覽</span>
+                <button onclick="copyToClipboard()" id="copyBtn" class="text-sm bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition">複製主管整份報告</button>
+            </h2>
+            <div id="uptAlert" class="upt-box mb-6 font-bold text-xl text-emerald-600 hidden"></div>
+            <pre id="resultText" class="whitespace-pre-wrap bg-slate-50 p-6 rounded-2xl border border-slate-200 text-gray-700 text-sm leading-relaxed font-mono"></pre>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('date').valueAsDate = new Date();
+
+        function calculateTotal() {
+            let totalRev = 0, totalOrd = 0, totalItm = 0;
+            document.querySelectorAll('.rev-input').forEach(el => totalRev += parseFloat(el.value) || 0);
+            document.querySelectorAll('.ord-input').forEach(el => totalOrd += parseFloat(el.value) || 0);
+            document.querySelectorAll('.itm-input').forEach(el => totalItm += parseFloat(el.value) || 0);
+            let totalUpt = totalOrd > 0 ? (totalItm / totalOrd).toFixed(2) : "0.00";
+
+            document.getElementById('calc_total_rev').innerText = totalRev.toLocaleString() + " 元";
+            document.getElementById('calc_total_ord').innerText = totalOrd + " 筆";
+            document.getElementById('calc_total_itm').innerText = totalItm + " 件";
+            document.getElementById('calc_total_upt').innerText = totalUpt;
+        }
+
+        const form = document.getElementById('managerForm');
+        const scriptURL = 'https://script.google.com/macros/s/AKfycby9QLEMRA_wJUFImeJqNyN-GXkNpFim1MYuPHCCy-HJctbUvHpnpVqVpKVkcuymu8kJhA/exec'; 
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: new FormData(form)})
+            .then(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                generateManagerPreview();
+            })
+            .catch(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                generateManagerPreview();
+            });
+        });
+
+        function generateManagerPreview() {
+            const data = new FormData(form);
+            
+            // 門市業績處理
+            const stores = [
+                { id: '中山店', rev: 'revenue_zhongshan', ord: 'orders_zhongshan', itm: 'items_zhongshan', issue: 'issues_zhongshan', icon: '🏛️' },
+                { id: '南西店', rev: 'revenue_nanxi', ord: 'orders_nanxi', itm: 'items_nanxi', issue: 'issues_nanxi', icon: '🛍️' },
+                { id: '中原店', rev: 'revenue_zhongyuan', ord: 'orders_zhongyuan', itm: 'items_zhongyuan', issue: 'issues_zhongyuan', icon: '🏡' },
+                { id: '新竹店', rev: 'revenue_hsinchu', ord: 'orders_hsinchu', itm: 'items_hsinchu', issue: 'issues_hsinchu', icon: '🚄' }
+            ];
+
+            let storeReportText = "";
+            let sumRev = 0, sumOrd = 0, sumItm = 0;
+
+            stores.forEach(s => {
+                const r = parseFloat(data.get(s.rev)) || 0;
+                const o = parseFloat(data.get(s.ord)) || 0;
+                const i = parseFloat(data.get(s.itm)) || 0;
+                const issueText = data.get(s.issue) || '無';
+                const upt = o > 0 ? (i / o).toFixed(2) : "0.00";
+
+                sumRev += r; sumOrd += o; sumItm += i;
+
+                storeReportText += `${s.icon} ${s.id}：\n`;
+                storeReportText += `   - 總業績：$${r.toLocaleString()} 元\n`;
+                storeReportText += `   - 單數 / 件數：${o} 筆 / ${i} 件\n`;
+                storeReportText += `   - UPT 平均件數：${upt}\n`;
+                storeReportText += `   - 店務缺失/異常處理：${issueText}\n\n`;
+            });
+
+            const totalUpt = sumOrd > 0 ? (sumItm / sumOrd).toFixed(2) : "0.00";
+
+            let cheer = "👑 四店整體 UPT 表現穩健，讓我們持續優化搭配，服務先行業績隨行！";
+            if (parseFloat(totalUpt) >= 2.5) { cheer = "🔥 績效絕佳！綜合 UPT 突破大關！團隊太強了！"; }
+            document.getElementById('uptAlert').innerText = cheer;
+            document.getElementById('uptAlert').classList.remove('hidden');
+
+            // 處理檢核清單文字
+            const chkStore = data.get('chk_store_ontime') === 'Y' ? '☑️ 已確認準時檢查' : '❌ 未檢查';
+            const chkReport = data.get('chk_reports_read') === 'Y' ? '☑️ 已全面閱讀並回覆' : '❌ 未處理';
+
+            // 組合完整 LINE 格式報告
+            let report = `✨ 《ZC》門市主管每日營運與人資決策回報 ✨\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `📅 日期：${data.get('date')} \n`;
+            report += `🌤️ 今日天氣：${data.get('weather')}\n`;
+            report += `👤 回報主管：${data.get('manager_name')}\n`;
+            report += `🏃‍♂️ 現場指導店別：${data.get('guidance_store')}\n`;
+            report += `📝 今日工作項目：${data.get('today_work_items')}\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            report += `《 ⚡ 主管每日核心管理檢核 》\n`;
+            report += ` 🔔 今日各店都有準時檢查：${chkStore}\n`;
+            report += ` 🔔 昨日所有人員回報都有閱讀以及必要回復：${chkReport}\n\n`;
+            
+            report += `《 👥 本周門市招募進度追蹤 》\n`;
+            report += `・本周面試人員：\n`;
+            report += `   └ 中山+南西：${data.get('hr_interview_zs_nx')} 人 | 中原：${data.get('hr_interview_zy')} 人 | 新竹：${data.get('hr_interview_hc')} 人\n`;
+            report += `・本周試上人員：\n`;
+            report += `   └ 中山+南西：${data.get('hr_trial_zs_nx')} 人 | 中原：${data.get('hr_trial_zy')} 人 | 新竹：${data.get('hr_trial_hc')} 人\n`;
+            report += `・本周聯繫中人員：\n`;
+            report += `   └ 中山+南西：${data.get('hr_contact_zs_nx')} 人 | 中原：${data.get('hr_contact_zy')} 人 | 新竹：${data.get('hr_contact_hc')} 人\n`;
+            report += `📝 招募心得備註：${data.get('hr_remarks') || '無'}\n\n`;
+
+            report += `《 📊 目前各店人力編制現況 》\n`;
+            report += ` 🏛️ 中山+南西：正職 ${data.get('current_ft_zs_nx')} 人 / 兼職 ${data.get('current_pt_zs_nx')} 人 (目標 6正職/4兼職)\n`;
+            report += ` 🏡 中原門市：正職 ${data.get('current_ft_zy')} 人 / 兼職 ${data.get('current_pt_zy')} 人\n`;
+            report += ` 🚄 新竹門市：正職 ${data.get('current_ft_hc')} 人 / 兼職 ${data.get('current_pt_hc')} 人\n\n`;
+
+            report += `《 📊 四店今日核心數據總計 》\n`;
+            report += `💰 全店總營業額：$${sumRev.toLocaleString()} 元\n`;
+            report += `🧾 全店總單數 / 件數：${sumOrd} 筆 / ${sumItm} 件\n`;
+            report += `📈 綜合 UPT 件數：${totalUpt}\n`;
+            report += `💎 全店新增 VIP 總數：${data.get('total_vip_count')} 位\n`;
+            report += `⚠️ 重大突發異常事件：${data.get('major_incident') || '無'}\n\n`;
+
+            report += `《 🏛️ 各門市深度數據明細 》\n`;
+            report += storeReportText;
+
+            report += `《 ✍️ 營運分析與未來策略部署 》\n`;
+            report += `・門店現況宏觀分析：\n${data.get('macro_analysis') || '無'}\n\n`;
+            report += `・給各店長/同仁的指導與激勵方向：\n${data.get('instruction_to_stores') || '無'}\n\n`;
+            report += `・給老闆與總部的核心戰略建議：\n${data.get('feedback_to_hq') || '無'}\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `💕 心情好，事情自然好。大家辛苦了，明天我們繼續引領商圈風潮！`;
+
+            document.getElementById('resultText').innerText = report;
+            document.getElementById('resultContainer').classList.remove('hidden');
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('resultText').innerText;
+            const el = document.createElement('textarea');
+            el.value = text; document.body.appendChild(el); el.select();
+            document.execCommand('copy'); document.body.removeChild(el);
+            
+            const btn = document.getElementById('copyBtn');
+            btn.innerText = "✅ 已複製主管報告！";
+            btn.className = "text-sm bg-emerald-600 text-white px-5 py-2 rounded-full";
+            setTimeout(() => { 
+                btn.innerText = "複製主管整份報告"; 
+                btn.className = "text-sm bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition";
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
