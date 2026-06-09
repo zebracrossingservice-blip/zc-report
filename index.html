@@ -18,7 +18,7 @@
             box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.1), 0 8px 10px -6px rgba(236, 72, 153, 0.1);
             backdrop-filter: blur(8px);
         }
-        label { font-weight: 600; color: #4b5563; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 4px; }
+        label { font-weight: 600; color: #4b5563; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 4px; font-size: 14px; }
         input, select, textarea { 
             width: 100%; padding: 0.85rem; border: 1.5px solid #f9a8d4; border-radius: 14px; margin-bottom: 1rem; font-size: 16px;
             transition: all 0.2s;
@@ -107,6 +107,38 @@
                 <div><label>全店新增 VIP 💎</label><input type="number" name="total_vip_all" value="0"></div>
             </div>
 
+            <div class="section-title"><span>🌙</span> 6月核心·特勤與顧客商品諮詢查核</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-4">
+                <div class="p-4 rounded-2xl border border-yellow-200 bg-yellow-50/40">
+                    <label class="text-yellow-800 font-bold">🌙 今日門市是否有「閉店客」服務？</label>
+                    <select name="has_closing_guest" id="has_closing_guest" onchange="toggleClosingGuestArea(this)" required>
+                        <option value="無">今日無閉店客服務</option>
+                        <option value="有">當日有留客服務 (需輸入下方明細)</option>
+                    </select>
+                    
+                    <div id="closingGuestDetail" class="mt-2 space-y-2" style="display:none;">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><small class="text-gray-600 font-semibold">接待顧客數 (位)</small><input type="number" name="close_guest_count" id="close_guest_count" value="0"></div>
+                            <div><small class="text-gray-600 font-semibold">成交總金額 (元)</small><input type="number" name="close_guest_amount" id="close_guest_amount" value="0"></div>
+                        </div>
+                        <div><small class="text-gray-600 font-semibold">對應成交訂單編號 / 備註</small><input type="text" name="close_guest_note" id="close_guest_note" placeholder="如：A0123 / 留客半小時"></div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl border border-purple-200 bg-purple-50/40">
+                    <label class="text-purple-800 font-bold">📸 今日是否有顧客拿「網路商品照片」問貨？</label>
+                    <select name="has_photo_ask" id="has_photo_ask" onchange="togglePhotoAskArea(this)" required>
+                        <option value="無">今日無顧客拿網路照片問貨</option>
+                        <option value="有">有客人詢問，且【已拍照回傳】公司群組</option>
+                    </select>
+                    
+                    <div id="photoAskReasonArea" class="mt-2" style="display:none;">
+                        <label class="text-xs text-red-600">⚠️ 請說明原因或未回傳之特殊狀況：</label>
+                        <input type="text" name="photo_ask_reason" id="photo_ask_reason" placeholder="如：客人臨時詢問漏未拍攝、今日無此情況...">
+                    </div>
+                </div>
+            </div>
+
             <div class="section-title"><span>📅</span> 人員工作進度</div>
             <div id="staffContainer">
                 <div class="perf-row staff-group">
@@ -190,6 +222,18 @@
         const dayMap = ['日','一','二','三','四','五','六'];
         document.getElementById('weekday').value = dayMap[new Date().getDay()];
 
+        // 閉店客區塊切換
+        function toggleClosingGuestArea(el) {
+            const area = document.getElementById('closingGuestDetail');
+            area.style.display = el.value === '有' ? 'block' : 'none';
+        }
+
+        // 照片詢問區塊切換 (留空或非正常回傳時的必填防呆)
+        function togglePhotoAskArea(el) {
+            const area = document.getElementById('photoAskReasonArea');
+            area.style.display = el.value === '無' ? 'block' : 'none';
+        }
+
         function toggleTaskNote(el) {
             const row = el.closest('.staff-group');
             const noteArea = row.querySelector('.task-note-area');
@@ -263,8 +307,8 @@
             names.forEach((n, i) => { 
                 if(n) {
                     progressText += `・${n}: [${statuses[i]}]\n`; 
-                    if(statuses[i] === '部分完成') progressText += `  └ ⚠️ 未完成: ${notes[i] || '未填'}\n`;
-                    if(mains[i]) progressText += `  └ 🔧 報修/備品: ${mains[i]}\n`;
+                    if(statuses[i] === '部分完成') progressText += `   └ ⚠️ 未完成: ${notes[i] || '未填'}\n`;
+                    if(mains[i]) progressText += `   └ 🔧 報修/備品: ${mains[i]}\n`;
                 }
             });
 
@@ -274,17 +318,37 @@
                 if(item) hotItems += `${i}. ${item}\n`;
             }
 
+            // 處理新項目的文字生成
+            let closingGuestReport = "";
+            if(data.get('has_closing_guest') === '有') {
+                closingGuestReport = `🌙 有留客服務 ➔ 接待: ${data.get('close_guest_count')}位 | 成交金額: $${data.get('close_guest_amount')}元\n   └ 📝 單號/備註: ${data.get('close_guest_note') || '無'}\n`;
+            } else {
+                closingGuestReport = `🌙 今日無特殊閉店留客客案件\n`;
+            }
+
+            let photoAskReport = "";
+            if(data.get('has_photo_ask') === '有') {
+                photoAskReport = `📸 有客人拿網路照片問貨 ➔ 【已拍照回傳】公司群組維護核查\n`;
+            } else {
+                photoAskReport = `📸 今日無客人拿照片問貨 ➔ 備註說明: ${data.get('photo_ask_reason') || '今日無此狀況'}\n`;
+            }
+
             let report = `✨ 《${data.get('store_name')}》工作進度回報 ✨\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
             report += `📅 日期：${data.get('date')} (${data.get('weekday')})\n`;
             report += `👥 進店人流：${data.get('visitor_count')} 人\n`;
             report += `📦 總件/筆數：${items} / ${orders}\n`;
             report += `📈 UPT 平均件數：${upt} (${upt >= 2.41 ? '達標' : '再努力看看'})\n`;
-            report += `💎 全店 VIP 開發：${data.get('total_vip_all')}\n\n`;
+            report += `💎 全店 VIP 開發：${data.get('total_vip_all')}\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `《 🌙 閉店客與網路諮詢回報 》\n`;
+            report += closingGuestReport;
+            report += photoAskReport;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
             report += `《 工作進度回報 📅 》\n${progressText}\n`;
             report += `《 今日門市狀況與顧客分析回報 📝 》\n${data.get('analysis') || '無'}\n\n`;
             report += `《 今日熱銷排名 🔥 》\n${hotItems || '無'}\n`;
-            report += `《 給明天開班人員備註 📋 》\n${data.get('to_next_shift') || '無'}\n\n`;
+            report += `《 给明天開班人員備註 📋 》\n${data.get('to_next_shift') || '無'}\n\n`;
             report += `《 給總部倉儲及主管建議 📦 》\n${data.get('to_hq_warehouse') || '無'}\n\n`;
             report += `《 給老闆的反饋 》\n${data.get('feedback_rita') || '無'}\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
