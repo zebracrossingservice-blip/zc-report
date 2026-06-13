@@ -44,6 +44,7 @@
         </header>
 
         <form id="storeForm" class="card p-6 md:p-8 mb-6">
+            <!-- 1. 基本資訊 -->
             <div class="section-title"><span>📍</span> 基本資訊</div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
                 <div>
@@ -75,6 +76,7 @@
                 </div>
             </div>
 
+            <!-- 2. 今日業績數據與自動 UPT -->
             <div class="section-title"><span>🛍️</span> 今日業績數據</div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
@@ -91,18 +93,36 @@
                 </div>
             </div>
 
+            <!-- 3. 核心特勤與顧客諮詢查核 -->
             <div class="section-title"><span>🔍</span> 6月核心·特勤與顧客商品諮詢查核</div>
             
             <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 mb-4">
                 <label>🔥 今日是否有閉店客服務？</label>
-                <select name="has_closing_customer" id="hasClosingCustomer" onchange="toggleClosingStaff()" required>
+                <p class="text-xs text-pink-600 mb-2">⚠️ 官方定義：下班前 5 分鐘內進門之顧客。</p>
+                <select name="has_closing_customer" id="hasClosingCustomer" onchange="toggleClosingLogic()" required>
                     <option value="無">❌ 無</option>
-                    <option value="有">✨ 有（請在下方填寫接待人員）</option>
+                    <option value="有">✨ 有（下班前 5 分鐘內有進客）</option>
                 </select>
                 
-                <div id="closingStaffWrapper" class="hidden mt-2">
-                    <label class="text-sm text-pink-700">👤 閉店客接待人員是誰？</label>
-                    <input type="text" name="closing_staff" id="closingStaff" placeholder="請輸入接待夥伴的姓名（例如：琇琇、小魚）">
+                <!-- 第二層：詢問是否有購買 -->
+                <div id="closingPurchaseWrapper" class="hidden mt-3 border-t border-pink-200/60 pt-3">
+                    <label class="text-sm text-pink-700">💰 該位閉店客最後有購買成交嗎？</label>
+                    <select name="closing_has_purchased" id="closingHasPurchased" onchange="toggleClosingLogic()">
+                        <option value="有購買">🛍️ 有購買成交（需填單號核發獎金）</option>
+                        <option value="沒有成交">😐 沒有成交（純試穿或逛逛）</option>
+                    </select>
+                </div>
+
+                <!-- 第三層：動態顯示的明細欄位 -->
+                <div id="closingDetailsWrapper" class="hidden mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-pink-100">
+                    <div>
+                        <label class="text-sm text-pink-700">👤 接待人員是誰？</label>
+                        <input type="text" name="closing_staff" id="closingStaff" placeholder="請輸入夥伴姓名（如：琇琇）">
+                    </div>
+                    <div id="orderNoWrapper">
+                        <label class="text-sm text-pink-700">🧾 閉店客訂單編號</label>
+                        <input type="text" name="closing_order_no" id="closingOrderNo" placeholder="請輸入成交訂單編號">
+                    </div>
                 </div>
             </div>
 
@@ -115,6 +135,7 @@
                 <textarea name="photo_inquiry_detail" rows="2" placeholder="若有，請簡述客人是詢問哪一張照片/哪款服飾商品？"></textarea>
             </div>
 
+            <!-- 4. 今日工作分析與回饋 -->
             <div class="section-title"><span>📝</span> 今日工作分析與回饋</div>
             <p class="text-xs text-pink-700 bg-pink-50 p-3 rounded-xl border border-pink-100 mb-3 leading-relaxed">
                 💡 **填寫導引（可自由融合以下內容）：**<br>
@@ -127,6 +148,7 @@
             <button type="submit" id="submitBtn" class="w-full bg-pink-600 text-white font-bold py-4 rounded-2xl shadow-xl mt-4 hover:bg-pink-700 transition">傳送今日門市日報 🚀</button>
         </form>
 
+        <!-- LINE 複製草稿區塊 -->
         <div id="resultContainer" class="card p-6 hidden">
             <h2 class="text-lg font-bold mb-3 text-pink-800 flex justify-between items-center">
                 <span>📋 LINE 門市回報草稿</span>
@@ -154,18 +176,39 @@
             }
         }
 
-        // 控制閉店客接待人員欄位的顯示與隱藏
-        function toggleClosingStaff() {
+        // 三層閉店客動態條件控管邏輯
+        function toggleClosingLogic() {
             const hasClosing = document.getElementById('hasClosingCustomer').value;
-            const wrapper = document.getElementById('closingStaffWrapper');
-            const input = document.getElementById('closingStaff');
+            const purchaseWrapper = document.getElementById('closingPurchaseWrapper');
+            const detailsWrapper = document.getElementById('closingDetailsWrapper');
+            const orderNoWrapper = document.getElementById('orderNoWrapper');
+            
+            const inputStaff = document.getElementById('closingStaff');
+            const inputOrder = document.getElementById('closingOrderNo');
+            const isPurchased = document.getElementById('closingHasPurchased').value;
+
             if (hasClosing === '有') {
-                wrapper.classList.remove('hidden');
-                input.required = true;
+                purchaseWrapper.classList.remove('hidden');
+                detailsWrapper.classList.remove('hidden');
+                inputStaff.required = true;
+                
+                if (isPurchased === '有購買') {
+                    orderNoWrapper.classList.remove('hidden');
+                    inputOrder.required = true;
+                } else {
+                    // 沒成交，隱藏單號格子並取消必填
+                    orderNoWrapper.classList.add('hidden');
+                    inputOrder.required = false;
+                    inputOrder.value = ''; 
+                }
             } else {
-                wrapper.classList.add('hidden');
-                input.required = false;
-                input.value = '';
+                // 完全沒閉店客，隱藏所有下層欄位並清空
+                purchaseWrapper.classList.add('hidden');
+                detailsWrapper.classList.add('hidden');
+                inputStaff.required = false;
+                inputOrder.required = false;
+                inputStaff.value = '';
+                inputOrder.value = '';
             }
         }
 
@@ -191,7 +234,16 @@
 
         function generatePreview() {
             const data = new FormData(form);
-            const closingStaffStr = data.get('closing_staff') ? ` (接待人員：${data.get('closing_staff')})` : '';
+            let closingDetailStr = '';
+            
+            if (data.get('has_closing_customer') === '有') {
+                const purchaseStatus = data.get('closing_has_purchased');
+                if (purchaseStatus === '有購買') {
+                    closingDetailStr = ` (結果: 有成交 / 人員: ${data.get('closing_staff')} / 單號: ${data.get('closing_order_no')})`;
+                } else {
+                    closingDetailStr = ` (結果: 未成交 / 接待人員: ${data.get('closing_staff')})`;
+                }
+            }
             
             let report = `📊 《ZC 門市績效日報》\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
@@ -206,7 +258,7 @@
             report += `━━━━━━━━━━━━━━━━━━━━\n\n`;
             
             report += `《 核心特勤與商品諮詢查核 🔍 》\n`;
-            report += `🌙 閉店客服務：${data.get('has_closing_customer')}${closingStaffStr}\n`;
+            report += `🌙 閉店客服務：${data.get('has_closing_customer')}${closingDetailStr}\n`;
             report += `📸 照片問貨：${data.get('has_photo_inquiry')}\n`;
             if(data.get('photo_inquiry_detail')) {
                 report += `💬 問貨詳情：${data.get('photo_inquiry_detail')}\n`;
