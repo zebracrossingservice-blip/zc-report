@@ -44,7 +44,6 @@
         </header>
 
         <form id="storeForm" class="card p-6 md:p-8 mb-6">
-            <!-- 1. 基本資訊 -->
             <div class="section-title"><span>📍</span> 基本資訊</div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
                 <div>
@@ -76,9 +75,8 @@
                 </div>
             </div>
 
-            <!-- 2. 今日業績數據與自動 UPT -->
             <div class="section-title"><span>🛍️</span> 今日業績數據</div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
                 <div>
                     <label>今日銷售總單數 (筆)</label>
                     <input type="number" name="total_orders" id="totalOrders" placeholder="請輸入總筆數" min="1" oninput="calculateUPT()" required>
@@ -93,7 +91,19 @@
                 </div>
             </div>
 
-            <!-- 3. 核心特勤與顧客諮詢查核 -->
+            <label class="text-pink-800 font-bold mt-2">🔥 本日熱銷商品 Top 3</label>
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <input type="text" name="top1_item" placeholder="第一名貨號/名稱" required>
+                </div>
+                <div>
+                    <input type="text" name="top2_item" placeholder="第二名貨號/名稱" required>
+                </div>
+                <div>
+                    <input type="text" name="top3_item" placeholder="第三名貨號/名稱" required>
+                </div>
+            </div>
+
             <div class="section-title"><span>🔍</span> 6月核心·特勤與顧客商品諮詢查核</div>
             
             <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 mb-4">
@@ -104,7 +114,6 @@
                     <option value="有">✨ 有（下班前 5 分鐘內有進客）</option>
                 </select>
                 
-                <!-- 第二層：詢問是否有購買 -->
                 <div id="closingPurchaseWrapper" class="hidden mt-3 border-t border-pink-200/60 pt-3">
                     <label class="text-sm text-pink-700">💰 該位閉店客最後有購買成交嗎？</label>
                     <select name="closing_has_purchased" id="closingHasPurchased" onchange="toggleClosingLogic()">
@@ -113,7 +122,6 @@
                     </select>
                 </div>
 
-                <!-- 第三層：動態顯示的明細欄位 -->
                 <div id="closingDetailsWrapper" class="hidden mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-pink-100">
                     <div>
                         <label class="text-sm text-pink-700">👤 接待人員是誰？</label>
@@ -135,7 +143,6 @@
                 <textarea name="photo_inquiry_detail" rows="2" placeholder="若有，請簡述客人是詢問哪一張照片/哪款服飾商品？"></textarea>
             </div>
 
-            <!-- 4. 今日工作分析與回饋 -->
             <div class="section-title"><span>📝</span> 今日工作分析與回饋</div>
             <p class="text-xs text-pink-700 bg-pink-50 p-3 rounded-xl border border-pink-100 mb-3 leading-relaxed">
                 💡 **填寫導引：**<br>
@@ -143,7 +150,6 @@
             </p>
             <textarea name="work_feedback" rows="4" placeholder="請輸入今日門市的綜合分析與反饋..." required></textarea>
 
-            <!-- 5. 專項對話與交接區塊 (新增) -->
             <div class="section-title"><span>💬</span> 專項叮嚀與交接反饋</div>
             <p class="text-xs text-gray-500 mb-3">⚠️ 以下欄位為專項對話，**若今天沒有特別事情，可以直接留空不填**。</p>
             
@@ -167,7 +173,6 @@
             <button type="submit" id="submitBtn" class="w-full bg-pink-600 text-white font-bold py-4 rounded-2xl shadow-xl mt-6 hover:bg-pink-700 transition">傳送今日門市日報 🚀</button>
         </form>
 
-        <!-- LINE 複製草稿區塊 -->
         <div id="resultContainer" class="card p-6 hidden">
             <h2 class="text-lg font-bold mb-3 text-pink-800 flex justify-between items-center">
                 <span>📋 LINE 門市回報草稿</span>
@@ -255,7 +260,7 @@
             
             if (data.get('has_closing_customer') === '有') {
                 const purchaseStatus = data.get('closing_has_purchased');
-                if (purchaseStatus === '反有購買') {
+                if (purchaseStatus === '有購買') {
                     closingDetailStr = ` (結果: 有成交 / 人員: ${data.get('closing_staff')} / 單號: ${data.get('closing_order_no')})`;
                 } else {
                     closingDetailStr = ` (結果: 未成交 / 接待人員: ${data.get('closing_staff')})`;
@@ -272,6 +277,7 @@
             report += `🧾 今日總單數：${data.get('total_orders')} 筆\n`;
             report += `🧺 今日總件數：${data.get('total_items')} 件\n`;
             report += `📈 平均 UPT：${data.get('calculated_upt') || '0.00'} \n`;
+            report += `🔥 熱銷 Top 3：1.${data.get('top1_item')} | 2.${data.get('top2_item')} | 3.${data.get('top3_item')}\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n\n`;
             
             report += `《 核心特勤與商品諮詢查核 🔍 》\n`;
@@ -285,7 +291,6 @@
             report += `📝 【今日工作分析與回饋】：\n`;
             report += `${data.get('work_feedback')}\n\n`;
             
-            // 專項欄位有填寫才輸出到 LINE 草稿中，沒填就隱藏，保持訊息乾淨
             if (data.get('to_tomorrow_staff').trim() || data.get('to_warehouse_buying').trim() || data.get('to_manager').trim()) {
                 report += `━━━━━━━━━━━━━━━━━━━━\n`;
                 report += `💬 【專項交接與反饋摘要】\n`;
