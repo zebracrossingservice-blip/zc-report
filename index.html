@@ -44,9 +44,8 @@
         </header>
 
         <form id="storeForm" class="card p-6 md:p-8 mb-6">
-            <!-- 1. 基本資訊 -->
             <div class="section-title"><span>📍</span> 基本資訊</div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
                 <div>
                     <label>填報日期</label>
                     <input type="date" name="report_date" id="reportDate" required>
@@ -63,7 +62,7 @@
                 <div>
                     <label>今日人流體感</label>
                     <select name="passenger_flow" required>
-                        <option value="很多">🔥 很多</option>
+                        <option value="辦活動般爆滿">🔥 很多</option>
                         <option value="多">👍 多</option>
                         <option value="中等">😐 中等</option>
                         <option value="少">📉 少</option>
@@ -72,7 +71,22 @@
                 </div>
             </div>
 
-            <!-- 2. 核心特勤與顧客諮詢查核 -->
+            <div class="section-title"><span>🛍️</span> 今日業績數據</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                    <label>今日銷售總單數 (筆)</label>
+                    <input type="number" name="total_orders" id="totalOrders" placeholder="請輸入總筆數" min="1" oninput="calculateUPT()" required>
+                </div>
+                <div>
+                    <label>今日銷售總件數 (件)</label>
+                    <input type="number" name="total_items" id="totalItems" placeholder="請輸入總件數" min="0" oninput="calculateUPT()" required>
+                </div>
+                <div>
+                    <label class="text-pink-700 font-bold">自動換算 UPT</label>
+                    <input type="text" name="calculated_upt" id="calculatedUPT" class="bg-pink-50 font-bold text-pink-700 border-pink-300" placeholder="自動計算中..." readonly>
+                </div>
+            </div>
+
             <div class="section-title"><span>🔍</span> 6月核心·特勤與顧客商品諮詢查核</div>
             
             <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 mb-4">
@@ -82,7 +96,6 @@
                     <option value="有">✨ 有（請在下方填寫接待人員）</option>
                 </select>
                 
-                <!-- 動態隱藏/顯示的接待人員欄位 -->
                 <div id="closingStaffWrapper" class="hidden mt-2">
                     <label class="text-sm text-pink-700">👤 閉店客接待人員是誰？</label>
                     <input type="text" name="closing_staff" id="closingStaff" placeholder="請輸入接待夥伴的姓名（例如：琇琇、小魚）">
@@ -98,7 +111,6 @@
                 <textarea name="photo_inquiry_detail" rows="2" placeholder="若有，請簡述客人是詢問哪一張照片/哪款服飾商品？"></textarea>
             </div>
 
-            <!-- 3. 今日工作分析與回饋 (大融合欄位) -->
             <div class="section-title"><span>📝</span> 今日工作分析與回饋</div>
             <p class="text-xs text-pink-700 bg-pink-50 p-3 rounded-xl border border-pink-100 mb-3 leading-relaxed">
                 💡 **填寫導引（可自由融合以下內容）：**<br>
@@ -111,7 +123,6 @@
             <button type="submit" id="submitBtn" class="w-full bg-pink-600 text-white font-bold py-4 rounded-2xl shadow-xl mt-4 hover:bg-pink-700 transition">傳送今日門市日報 🚀</button>
         </form>
 
-        <!-- LINE 複製草稿區塊 -->
         <div id="resultContainer" class="card p-6 hidden">
             <h2 class="text-lg font-bold mb-3 text-pink-800 flex justify-between items-center">
                 <span>📋 LINE 門市回報草稿</span>
@@ -124,6 +135,21 @@
     <script>
         // 自動帶入當天日期
         document.getElementById('reportDate').valueAsDate = new Date();
+
+        // 即時自動換算 UPT 邏輯
+        function calculateUPT() {
+            const orders = parseFloat(document.getElementById('totalOrders').value);
+            const items = parseFloat(document.getElementById('totalItems').value);
+            const uptInput = document.getElementById('calculatedUPT');
+
+            if (orders > 0 && items >= 0) {
+                const upt = items / orders;
+                // 四捨五入到小數點後兩位
+                uptInput.value = upt.toFixed(2);
+            } else {
+                uptInput.value = '';
+            }
+        }
 
         // 控制閉店客接待人員欄位的顯示與隱藏
         function toggleClosingStaff() {
@@ -169,6 +195,10 @@
             report += `📅 日期：${data.get('report_date')}\n`;
             report += `📍 門市：${data.get('store_name')}\n`;
             report += `👥 今日人流體感：${data.get('passenger_flow')}\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `🧾 今日總單數：${data.get('total_orders')} 筆\n`;
+            report += `🧺 今日總件數：${data.get('total_items')} 件\n`;
+            report += `📈 平均 UPT：${data.get('calculated_upt') || '0.00'} \n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n\n`;
             
             report += `《 核心特勤與商品諮詢查核 🔍 》\n`;
