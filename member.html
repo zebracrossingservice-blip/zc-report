@@ -53,6 +53,7 @@
         </header>
 
         <form id="memberForm" class="card p-6 md:p-8 mb-6">
+            <!-- 基本資訊群組 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
                 <div>
                     <label>日誌日期</label>
@@ -73,6 +74,12 @@
                 </div>
             </div>
 
+            <!-- 今日穿搭項目 (新加入) -->
+            <div class="section-title"><span>👗</span> 今日當班穿搭</div>
+            <label>今天上班身上穿的是什麼商品？</label>
+            <input type="text" name="staff_outfit" placeholder="請填寫貨物編號（如：A2026-01）或可辨識的商品名稱" required>
+
+            <!-- 今日主要工作內容 (多選標籤 - 已加入開店/閉店店務) -->
             <div class="section-title"><span>🏃‍♂️</span> 今日主要工作內容</div>
             <label>今天主要負責了哪些事務？(可多選)</label>
             <div class="tag-group" id="workTags">
@@ -83,9 +90,13 @@
                 <span class="tag-item" data-value="整理樣品">5. 整理樣品</span>
                 <span class="tag-item" data-value="接待更衣">6. 接待更衣</span>
                 <span class="tag-item" data-value="拍攝行銷">7. 拍攝行銷</span>
+                <span class="tag-item" data-value="開店店務">☀️ 8. 開店店務</span>
+                <span class="tag-item" data-value="閉店店務">🌙 9. 閉店店務</span>
             </div>
+            <!-- 隱藏欄位，用來包裝多選數據傳給 GAS 後台 -->
             <input type="hidden" name="work_tasks" id="work_tasks_input">
 
+            <!-- 核心反饋區塊 -->
             <div class="section-title"><span>🗣️</span> 現場焦點反饋</div>
             <label class="text-blue-800 font-bold mb-1">今天現場顧客值得分享，或是需要反應給公司的事？</label>
             <p class="text-xs text-blue-600 bg-blue-50/70 p-3 rounded-xl border border-blue-100 mb-3 leading-relaxed">
@@ -102,6 +113,7 @@
             <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-xl mt-4 hover:bg-blue-700 transition">傳送今日現場日誌 🚀</button>
         </form>
 
+        <!-- LINE 複製草稿區塊 -->
         <div id="resultContainer" class="card p-6 hidden">
             <h2 class="text-lg font-bold mb-3 text-blue-800 flex justify-between items-center">
                 <span>📋 LINE 回報草稿</span>
@@ -161,6 +173,7 @@
             report += `📍 門市：${data.get('store_name')}\n`;
             report += `👤 夥伴：${data.get('staff_name')}\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `👗 今日穿搭：${data.get('staff_outfit') || '未填'}\n`;
             report += `🏃‍♂️ 今日主要工作：${data.get('work_tasks') || '未勾選'}\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n\n`;
             report += `🗣️ 【今日現場反饋（好表現/新商機/優化提案）】：\n`;
