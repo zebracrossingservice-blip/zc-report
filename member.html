@@ -25,16 +25,18 @@
         input:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
         .section-title { 
             display: flex; align-items: center; gap: 8px;
-            margin: 2rem 0 1.2rem 0; font-size: 1.25rem; font-weight: 800; color: #1d4ed8; 
+            margin: 1.8rem 0 1rem 0; font-size: 1.25rem; font-weight: 800; color: #1d4ed8; 
         }
-        .tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+        /* 多選標籤樣式 */
+        .tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.2rem; }
         .tag-item { 
-            padding: 8px 14px; border-radius: 20px; border: 1.5px solid #bfdbfe; 
+            padding: 10px 16px; border-radius: 20px; border: 1.5px solid #bfdbfe; 
             font-size: 14px; cursor: pointer; transition: 0.2s; background: white;
-            font-weight: 500; color: #1e40af;
+            font-weight: 600; color: #1e40af; user-select: none;
         }
         .tag-item:hover { background: #eff6ff; }
-        .tag-item.active { background: #3b82f6; color: white; border-color: #3b82f6; transform: scale(1.05); }
+        .tag-item.active { background: #3b82f6; color: white; border-color: #3b82f6; transform: scale(1.03); }
+        
         #loadingOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; align-items: center; justify-content: center; color: white; flex-direction: column; }
     </style>
 </head>
@@ -44,20 +46,24 @@
         <p class="font-bold text-xl text-white">正在傳送你的日誌 ✨</p>
     </div>
 
-    <div class="max-w-3xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold text-blue-900 tracking-tight">ZC 夥伴個人日誌 🖊️</h1>
-            <p class="text-blue-600 font-medium mt-2">記錄你的精彩銷售瞬間，分享顧客的故事</p>
+    <div class="max-w-2xl mx-auto">
+        <header class="text-center mb-6">
+            <h1 class="text-2xl font-extrabold text-blue-900 tracking-tight">ZC 夥伴個人日誌 🖊️</h1>
+            <p class="text-blue-600 font-medium mt-1">捕捉現場真實反饋，把好點子變現 🚀</p>
         </header>
 
-        <form id="memberForm" class="card p-6 md:p-10 mb-8">
-            <div class="grid grid-cols-2 gap-4 mb-4">
+        <form id="memberForm" class="card p-6 md:p-8 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
+                <div>
+                    <label>日誌日期</label>
+                    <input type="date" name="report_date" id="reportDate" required>
+                </div>
                 <div>
                     <label>夥伴姓名</label>
                     <input type="text" name="staff_name" placeholder="請輸入姓名" required>
                 </div>
                 <div>
-                    <label>今日上班門市</label>
+                    <label>上班門市</label>
                     <select name="store_name" required>
                         <option value="中山門市">🏛️ 中山門市</option>
                         <option value="中原門市">🏡 中原門市</option>
@@ -67,88 +73,57 @@
                 </div>
             </div>
 
-            <div class="section-title"><span>🛠️</span> 今日協助店務</div>
-            <textarea name="task_done" rows="2" placeholder="今天除了銷售，還幫忙完成了哪些店務？(如：整理陳列、進貨處理...)"></textarea>
-
-            <div class="section-title"><span>👗</span> 今日穿搭表現</div>
-            <label>今天身上穿的是？</label>
-            <input type="text" name="staff_outfit" placeholder="請填寫商品資訊以及搭配方式">
-            <label>這套今天被客人詢問嗎？</label>
-            <select name="outfit_asked">
-                <option value="很有感！被問很多次">🔥 很有感！被問很多次</option>
-                <option value="有，客人覺得不錯">👍 有，客人覺得不錯但價格太貴</option>
-                <option value="有，客人覺得不錯">👍 有，客人覺得不錯</option>
-                <option value="普通，沒特別被注意到">😐 普通，沒特別被注意到</option>
-                <option value="有，客人覺得不錯">😐 有，客人覺得不錯但有其他問題</option>
-            </select>
-
-            <div class="section-title"><span>🤝</span> 服務與銷售分享</div>
-            <label>覺得今天自己做得還不錯的地方？(多選)</label>
-            <div class="tag-group" id="serviceTags">
-                <span class="tag-item">1. 服務到位</span>
-                <span class="tag-item">2. 銷售優秀</span>
-                <span class="tag-item">3. 團隊給力</span>
-                <span class="tag-item">4. 反應快速</span>
-                <span class="tag-item">5. 給顧客良好建議</span>
-                <span class="tag-item">6. 結帳快速</span>
-                <span class="tag-item">7. 找貨快速</span>
-                <span class="tag-item">8. 店務完美</span>
-                <span class="tag-item">9. 微笑之星</span>
-                <span class="tag-item">10. 禮貌擔當</span>
+            <div class="section-title"><span>🏃‍♂️</span> 今日主要工作內容</div>
+            <label>今天主要負責了哪些事務？(可多選)</label>
+            <div class="tag-group" id="workTags">
+                <span class="tag-item" data-value="拿貨">1. 拿貨</span>
+                <span class="tag-item" data-value="站櫃檯">2. 站櫃檯</span>
+                <span class="tag-item" data-value="外場接待">3. 外場接待</span>
+                <span class="tag-item" data-value="整理入庫">4. 整理入庫</span>
+                <span class="tag-item" data-value="整理樣品">5. 整理樣品</span>
+                <span class="tag-item" data-value="接待更衣">6. 接待更衣</span>
+                <span class="tag-item" data-value="拍攝行銷">7. 拍攝行銷</span>
             </div>
-            <input type="hidden" name="service_types" id="service_types_input">
+            <input type="hidden" name="work_tasks" id="work_tasks_input">
 
-            <label>分享今天的服務與銷售狀況？</label>
-            <textarea name="success_story" rows="3" placeholder="客人原本有什麼需求或問題,你如何解決...今天跟誰聊~他從高雄來"></textarea>
+            <div class="section-title"><span>🗣️</span> 現場焦點反饋</div>
+            <label class="text-blue-800 font-bold mb-1">今天現場顧客值得分享，或是需要反應給公司的事？</label>
+            <p class="text-xs text-blue-600 bg-blue-50/70 p-3 rounded-xl border border-blue-100 mb-3 leading-relaxed">
+                💡 **小提醒：可以從以下三個方向來分享喔！**<br>
+                1. **默默付出的努力：** 今天做了哪些很棒、很有價值的店務或銷售服務，是公司在後台可能看不到的？<br>
+                2. **顧客渴望的商品：** 客人今天對哪些特定商品/顏色/款式很有興趣，但因為現場目前沒有，導致公司不知道這個商機？<br>
+                3. **提升業績的好點子：** 依你今天的現場觀察，如果我們修正或調整哪個小地方（如陳列、話術、動線、補貨機制），會對業績或服務更好？
+            </p>
+            <textarea name="customer_feedback" rows="6" placeholder="💡 內文填寫範例參考：
+1. 今天把庫存的 B 款針織衫重新燙過、換到正門口假人穿搭，結果下午立刻多賣了 3 件！
+2. 今天有三個客人都主動問有沒有「粉藍色」的西裝褲，但我們現場目前只有黑白兩色，感覺粉藍色有市場！
+3. 發現更衣室的鏡子燈光有點偏暗，如果能加強亮度，客人在試穿時看衣服顏色會更精準，應該能提高成交率。" required></textarea>
 
-            <div class="section-title"><span>🔍</span> 顧客在想什麼？</div>
-            <label>今天顧客一直在問的是什麼？</label>
-            <textarea name="customer_ask" rows="2" placeholder="特定款？某商品？穿搭？"></textarea>
-            
-            <label>今天印象最深刻的一位客人/有趣的事？</label>
-            <textarea name="customer_story" rows="2" placeholder="有趣的對話或是感人的故事..."></textarea>
-
-            <div class="section-title"><span>💌</span> 給團隊的反饋 (私房話)</div>
-            <div class="space-y-4">
-                <div class="bg-pink-50 p-4 rounded-2xl border border-pink-100">
-                    <label class="text-pink-700">想對團隊說的話 💝</label>
-                    <textarea name="to_rita" rows="2" placeholder="關於產品靈感、店櫃氣氛..."></textarea>
-                </div>
-                <div class="bg-green-50 p-4 rounded-2xl border border-green-100">
-                    <label class="text-green-700">想給公司採購的話 📦</label>
-                    <textarea name="to_buying" rows="2" placeholder="客人反映的顏色/版型問題..."></textarea>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                    <label class="text-blue-700">想給公司倉儲的話 🚚</label>
-                    <textarea name="to_warehouse" rows="2" placeholder="補貨速度、包裝建議..."></textarea>
-                </div>
-            </div>
-
-            <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-xl mt-8 hover:bg-blue-700 transition">送出我的今日日誌 🚀</button>
+            <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-xl mt-4 hover:bg-blue-700 transition">傳送今日現場日誌 🚀</button>
         </form>
 
-        <div id="resultContainer" class="card p-6 md:p-8 hidden">
-            <h2 class="text-xl font-bold mb-4 text-blue-800 flex justify-between">
+        <div id="resultContainer" class="card p-6 hidden">
+            <h2 class="text-lg font-bold mb-3 text-blue-800 flex justify-between items-center">
                 <span>📋 LINE 回報草稿</span>
-                <button onclick="copyToClipboard()" class="text-sm bg-blue-600 text-white px-4 py-1 rounded-full">複製文字</button>
+                <button onclick="copyToClipboard()" class="text-xs bg-blue-600 text-white px-4 py-1.5 rounded-full hover:bg-blue-700 transition">複製文字</button>
             </h2>
-            <pre id="resultText" class="whitespace-pre-wrap bg-blue-50 p-6 rounded-2xl text-gray-700 text-sm leading-relaxed border border-blue-100"></pre>
+            <pre id="resultText" class="whitespace-pre-wrap bg-blue-50 p-5 rounded-2xl text-gray-700 text-sm leading-relaxed border border-blue-100"></pre>
         </div>
     </div>
 
     <script>
-        // 請記得更換成您最新的 GAS 網址
-        const scriptURL = 'https://script.google.com/macros/s/你的網址/exec'; 
+        // 自動帶入當天日期
+        document.getElementById('reportDate').valueAsDate = new Date();
 
-        // 多選標籤邏輯
-        const tags = document.querySelectorAll('.tag-item');
-        const hiddenInput = document.getElementById('service_types_input');
+        // 串接的多選標籤邏輯
+        const tags = document.querySelectorAll('#workTags .tag-item');
+        const hiddenInput = document.getElementById('work_tasks_input');
         let selectedTags = [];
 
         tags.forEach(tag => {
             tag.addEventListener('click', () => {
                 tag.classList.toggle('active');
-                const val = tag.innerText;
+                const val = tag.getAttribute('data-value');
                 if (selectedTags.includes(val)) {
                     selectedTags = selectedTags.filter(t => t !== val);
                 } else {
@@ -157,6 +132,9 @@
                 hiddenInput.value = selectedTags.join(', ');
             });
         });
+
+        // 請記得檢查或替換成您串接的 GAS 網址
+        const scriptURL = 'https://script.google.com/macros/s/你的網址/exec'; 
 
         const form = document.getElementById('memberForm');
         form.addEventListener('submit', e => {
@@ -179,29 +157,16 @@
             const data = new FormData(form);
             let report = `📝 《ZC 夥伴個人日誌》\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
-            report += `👤 夥伴：${data.get('staff_name')}\n`;
+            report += `📅 日期：${data.get('report_date')}\n`;
             report += `📍 門市：${data.get('store_name')}\n`;
-            report += `🛠️ 協助店務：${data.get('task_done') || '無'}\n\n`;
-            
-            report += `《 穿搭表現 👗 》\n`;
-            report += `🧥 今日穿搭：${data.get('staff_outfit') || '未填'}\n`;
-            report += `💬 被詢問度：${data.get('outfit_asked')}\n\n`;
-
-            report += `《 服務與銷售 🤝 》\n`;
-            report += `⭐ 今日優點：${data.get('service_types') || '無'}\n`;
-            report += `🌟 服務與銷售分析：${data.get('success_story') || '無'}\n\n`;
-
-            report += `《 顧客洞察 🔍 》\n`;
-            report += `❓ 顧客頻繁詢問：${data.get('customer_ask') || '無'}\n`;
-            report += `😮 印象深刻的事：${data.get('customer_story') || '無'}\n\n`;
-
-            report += `《 給團隊的反饋 💌 》\n`;
-            if(data.get('to_rita')) report += `💝 給團隊：${data.get('to_rita')}\n`;
-            if(data.get('to_buying')) report += `📦 給採購：${data.get('to_buying')}\n`;
-            if(data.get('to_warehouse')) report += `🚚 給倉儲：${data.get('to_warehouse')}\n`;
-            
+            report += `👤 夥伴：${data.get('staff_name')}\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
-            report += `✨ 今天也辛苦了，謝謝大家！`;
+            report += `🏃‍♂️ 今日主要工作：${data.get('work_tasks') || '未勾選'}\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+            report += `🗣️ 【今日現場反饋（好表現/新商機/優化提案）】：\n`;
+            report += `${data.get('customer_feedback')}\n\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `✨ 辛苦了！今日日誌已上傳後台。`;
 
             document.getElementById('resultText').innerText = report;
             document.getElementById('resultContainer').classList.remove('hidden');
@@ -213,7 +178,7 @@
             const el = document.createElement('textarea');
             el.value = text; document.body.appendChild(el); el.select();
             document.execCommand('copy'); document.body.removeChild(el);
-            alert('已複製到剪貼簿，可以去 LINE 發給 Rita 囉！');
+            alert('已複製到剪貼簿，可以傳到 LINE 群組囉！');
         }
     </script>
 </body>
