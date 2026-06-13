@@ -45,7 +45,7 @@
 
         <form id="storeForm" class="card p-6 md:p-8 mb-6">
             <div class="section-title"><span>📍</span> 基本資訊</div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
                 <div>
                     <label>填報日期</label>
                     <input type="date" name="report_date" id="reportDate" required>
@@ -62,12 +62,16 @@
                 <div>
                     <label>今日人流體感</label>
                     <select name="passenger_flow" required>
-                        <option value="辦活動般爆滿">🔥 很多</option>
+                        <option value="很多">🔥 很多</option>
                         <option value="多">👍 多</option>
                         <option value="中等">😐 中等</option>
                         <option value="少">📉 少</option>
                         <option value="很少">❌ 很少</option>
                     </select>
+                </div>
+                <div>
+                    <label>總結回報人員</label>
+                    <input type="text" name="reporter_name" placeholder="請輸入填表人姓名" required>
                 </div>
             </div>
 
@@ -128,7 +132,7 @@
                 <span>📋 LINE 門市回報草稿</span>
                 <button onclick="copyToClipboard()" class="text-xs bg-pink-600 text-white px-4 py-1.5 rounded-full hover:bg-pink-700 transition">複製文字</button>
             </h2>
-            <pre id="resultText" class="whitespace-pre-wrap bg-pink-50 p-5 rounded-2xl text-gray-700 text-sm leading-relaxed border border-pink-100"></pre>
+            <pre id="resultText" class="whitespace-pre-wrap bg-pink-50 p-5 rounded-2xl text-gray-700 text-sm leading-relaxed border border-blue-100"></pre>
         </div>
     </div>
 
@@ -144,7 +148,6 @@
 
             if (orders > 0 && items >= 0) {
                 const upt = items / orders;
-                // 四捨五入到小數點後兩位
                 uptInput.value = upt.toFixed(2);
             } else {
                 uptInput.value = '';
@@ -162,7 +165,7 @@
             } else {
                 wrapper.classList.add('hidden');
                 input.required = false;
-                input.value = ''; // 清空
+                input.value = '';
             }
         }
 
@@ -194,6 +197,7 @@
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
             report += `📅 日期：${data.get('report_date')}\n`;
             report += `📍 門市：${data.get('store_name')}\n`;
+            report += `👤 回報人員：${data.get('reporter_name')}\n`;
             report += `👥 今日人流體感：${data.get('passenger_flow')}\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
             report += `🧾 今日總單數：${data.get('total_orders')} 筆\n`;
