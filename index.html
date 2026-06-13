@@ -138,14 +138,33 @@
             <!-- 4. 今日工作分析與回饋 -->
             <div class="section-title"><span>📝</span> 今日工作分析與回饋</div>
             <p class="text-xs text-pink-700 bg-pink-50 p-3 rounded-xl border border-pink-100 mb-3 leading-relaxed">
-                💡 **填寫導引（可自由融合以下內容）：**<br>
-                • **店況分析：** 今天的整體銷售狀況、特殊客訴或店務突發事件處理。<br>
-                • **明天交接：** 有什麼需要交代給明天開班人員或特別提醒自己的話？<br>
-                • **公司建議：** 有沒有需要給總部、倉儲或採購的補貨/版型反饋建議？
+                💡 **填寫導引：**<br>
+                • 今天的整體銷售狀況、現場客流體感、特殊客訴或店務突發事件處理。
             </p>
-            <textarea name="work_feedback" rows="6" placeholder="請輸入今日門市的綜合分析與反饋..." required></textarea>
+            <textarea name="work_feedback" rows="4" placeholder="請輸入今日門市的綜合分析與反饋..." required></textarea>
 
-            <button type="submit" id="submitBtn" class="w-full bg-pink-600 text-white font-bold py-4 rounded-2xl shadow-xl mt-4 hover:bg-pink-700 transition">傳送今日門市日報 🚀</button>
+            <!-- 5. 專項對話與交接區塊 (新增) -->
+            <div class="section-title"><span>💬</span> 專項叮嚀與交接反饋</div>
+            <p class="text-xs text-gray-500 mb-3">⚠️ 以下欄位為專項對話，**若今天沒有特別事情，可以直接留空不填**。</p>
+            
+            <div class="space-y-3">
+                <div class="bg-amber-50/60 p-4 rounded-2xl border border-amber-100">
+                    <label class="text-amber-800 text-sm">📋 1. 想要交接給明天開班夥伴或自己的話</label>
+                    <textarea name="to_tomorrow_staff" rows="2" class="border-amber-200 focus:border-amber-500 focus:box-shadow mb-0" placeholder="💡 填寫範例：明天開班加油！另外現場 1 元硬幣不夠了，再麻煩早班先去協助換錢喔～"></textarea>
+                </div>
+
+                <div class="bg-blue-50/60 p-4 rounded-2xl border border-blue-100">
+                    <label class="text-blue-800 text-sm">📦 2. 想要交代公司倉儲以及採購的重要事項</label>
+                    <textarea name="to_warehouse_buying" rows="2" class="border-blue-200 focus:border-blue-500 mb-0" placeholder="💡 填寫範例：今天連續三個客人都問有沒有防曬薄外套，目前現場斷貨，再麻煩協助補貨；另外熱銷 C 款洋裝客人都反映版型偏大。"></textarea>
+                </div>
+
+                <div class="bg-purple-50/60 p-4 rounded-2xl border border-purple-100">
+                    <label class="text-purple-800 text-sm">👑 3. 想反應給主管或老闆的問題</label>
+                    <textarea name="to_manager" rows="2" class="border-purple-200 focus:border-purple-500 mb-0" placeholder="💡 填寫範例：近期中山二店招牌燈的定時開關好像故障了，晚上熄燈時間不準，需要安排師傅來檢修。"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-pink-600 text-white font-bold py-4 rounded-2xl shadow-xl mt-6 hover:bg-pink-700 transition">傳送今日門市日報 🚀</button>
         </form>
 
         <!-- LINE 複製草稿區塊 -->
@@ -196,13 +215,11 @@
                     orderNoWrapper.classList.remove('hidden');
                     inputOrder.required = true;
                 } else {
-                    // 沒成交，隱藏單號格子並取消必填
                     orderNoWrapper.classList.add('hidden');
                     inputOrder.required = false;
                     inputOrder.value = ''; 
                 }
             } else {
-                // 完全沒閉店客，隱藏所有下層欄位並清空
                 purchaseWrapper.classList.add('hidden');
                 detailsWrapper.classList.add('hidden');
                 inputStaff.required = false;
@@ -238,7 +255,7 @@
             
             if (data.get('has_closing_customer') === '有') {
                 const purchaseStatus = data.get('closing_has_purchased');
-                if (purchaseStatus === '有購買') {
+                if (purchaseStatus === '反有購買') {
                     closingDetailStr = ` (結果: 有成交 / 人員: ${data.get('closing_staff')} / 單號: ${data.get('closing_order_no')})`;
                 } else {
                     closingDetailStr = ` (結果: 未成交 / 接待人員: ${data.get('closing_staff')})`;
@@ -267,6 +284,17 @@
             
             report += `📝 【今日工作分析與回饋】：\n`;
             report += `${data.get('work_feedback')}\n\n`;
+            
+            // 專項欄位有填寫才輸出到 LINE 草稿中，沒填就隱藏，保持訊息乾淨
+            if (data.get('to_tomorrow_staff').trim() || data.get('to_warehouse_buying').trim() || data.get('to_manager').trim()) {
+                report += `━━━━━━━━━━━━━━━━━━━━\n`;
+                report += `💬 【專項交接與反饋摘要】\n`;
+                if(data.get('to_tomorrow_staff').trim()) report += `📋 給明天夥伴：${data.get('to_tomorrow_staff')}\n`;
+                if(data.get('to_warehouse_buying').trim()) report += `📦 給倉儲採購：${data.get('to_warehouse_buying')}\n`;
+                if(data.get('to_manager').trim()) report += `👑 給主管老闆：${data.get('to_manager')}\n`;
+                report += `\n`;
+            }
+            
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
             report += `✨ 門市營運日報已上傳。大家辛苦了！`;
 
