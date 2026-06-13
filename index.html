@@ -18,264 +18,143 @@
             box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.1), 0 8px 10px -6px rgba(236, 72, 153, 0.1);
             backdrop-filter: blur(8px);
         }
-        label { font-weight: 600; color: #4b5563; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 4px; font-size: 14px; }
+        label { font-weight: 600; color: #9d174d; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px; }
         input, select, textarea { 
-            width: 100%; padding: 0.85rem; border: 1.5px solid #f9a8d4; border-radius: 14px; margin-bottom: 1rem; font-size: 16px;
-            transition: all 0.2s;
-            background-color: white;
+            width: 100%; padding: 0.85rem; border: 1.5px solid #fbcfe8; border-radius: 14px; margin-bottom: 1rem; font-size: 16px;
+            transition: all 0.2s; background-color: white;
         }
-        input:focus, textarea:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.15); transform: translateY(-1px); }
+        input:focus, textarea:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.15); }
         .section-title { 
             display: flex; align-items: center; gap: 8px;
-            margin: 2rem 0 1.2rem 0; font-size: 1.2rem; font-weight: 800; color: #be185d; 
+            margin: 1.8rem 0 1rem 0; font-size: 1.25rem; font-weight: 800; color: #be185d; 
         }
-        .perf-row { 
-            background: linear-gradient(to right, #ffffff, #fff1f2); 
-            padding: 1.5rem; border-radius: 20px; margin-bottom: 1.2rem; 
-            border: 1px solid #fbcfe8;
-            position: relative;
-        }
-        .reminder-box {
-            background-color: #f3f4f6;
-            color: #6b7280;
-            padding: 0.75rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            border: 1px solid #e5e7eb;
-        }
-        #loadingOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; align-items: center; justify-content: center; color: white; flex-direction: column; backdrop-filter: blur(4px); }
-        .btn-primary {
-            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.4); }
-        .google-sheet-btn {
-            background: #10b981; color: white; padding: 10px 20px; border-radius: 12px; font-weight: bold;
-            display: inline-flex; align-items: center; gap: 8px; margin-bottom: 1rem; transition: all 0.2s;
-        }
-        .upt-box { background: #fff1f2; border: 2px dashed #ec4899; padding: 1rem; border-radius: 16px; text-align: center; }
+        #loadingOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; align-items: center; justify-content: center; color: white; flex-direction: column; }
     </style>
 </head>
 <body class="p-4 md:p-8">
     <div id="loadingOverlay">
         <div class="animate-spin rounded-full h-16 w-16 border-4 border-pink-500 border-t-transparent mb-4"></div>
-        <p class="font-bold text-xl text-white">正在同步數據 ✨</p>
+        <p class="font-bold text-xl text-white">正在傳送門市績效數據 📊</p>
     </div>
 
-    <div class="max-w-4xl mx-auto">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-gray-800 tracking-tight">《ZC》門市績效系統 🎀</h1>
-            <p class="text-pink-600 font-medium mt-2">辛苦了！在成為各商圈生意最好的路上讓我們一起達成🚀</p>
+    <div class="max-w-2xl mx-auto">
+        <header class="text-center mb-6">
+            <h1 class="text-2xl font-extrabold text-pink-900 tracking-tight">ZC 門市績效系統 📈</h1>
+            <p class="text-pink-600 font-medium mt-1">簡化流程，專注核心店務與現場業績</p>
         </header>
 
-        <div class="flex justify-end mb-4">
-            <a href="https://docs.google.com/spreadsheets/d/1O0z1I6v_wXQY0t_WclN89pDOfL4O60p8gUuO924M6V4/edit" target="_blank" class="google-sheet-btn shadow-lg text-sm">
-                📊 查看後端數據表
-            </a>
-        </div>
-
-        <form id="storeForm" class="card p-6 md:p-10 mb-8">
+        <form id="storeForm" class="card p-6 md:p-8 mb-6">
+            <!-- 1. 基本資訊 -->
             <div class="section-title"><span>📍</span> 基本資訊</div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                    <label>回報單位</label>
-                    <select name="store_name" id="store_name" required>
-                        <option value="">選擇單位</option>
+                    <label>填報日期</label>
+                    <input type="date" name="report_date" id="reportDate" required>
+                </div>
+                <div>
+                    <label>回報門市</label>
+                    <select name="store_name" required>
                         <option value="中山門市">🏛️ 中山門市</option>
                         <option value="中原門市">🏡 中原門市</option>
                         <option value="新竹門市">🚄 新竹門市</option>
                         <option value="台北中心">📦 台北中心</option>
                     </select>
                 </div>
-                <div><label>日期</label><input type="date" name="date" id="date" required></div>
                 <div>
-                    <label>星期</label>
-                    <select name="weekday" id="weekday">
-                        <option value="一">星期一</option><option value="二">星期二</option><option value="三">星期三</option>
-                        <option value="四">星期四</option><option value="五">星期五</option><option value="六">星期六</option>
-                        <option value="日">星期日</option>
+                    <label>今日人流體感</label>
+                    <select name="passenger_flow" required>
+                        <option value="很多">🔥 很多</option>
+                        <option value="多">👍 多</option>
+                        <option value="中等">😐 中等</option>
+                        <option value="少">📉 少</option>
+                        <option value="很少">❌ 很少</option>
                     </select>
                 </div>
-                <div><label>今日進店人流</label><input type="number" name="visitor_count" value="0"></div>
             </div>
 
-            <div class="section-title"><span>📊</span> 今日數據總計</div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div><label>總件數 🧺</label><input type="number" name="total_items" id="total_items" required placeholder="件"></div>
-                <div><label>總筆數 🧾</label><input type="number" name="total_orders" id="total_orders" required placeholder="筆"></div>
-                <div><label>全店新增 VIP 💎</label><input type="number" name="total_vip_all" value="0"></div>
-            </div>
-
-            <div class="section-title"><span>🌙</span> 6月核心·特勤與顧客商品諮詢查核</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-4">
-                <div class="p-4 rounded-2xl border border-yellow-200 bg-yellow-50/40">
-                    <label class="text-yellow-800 font-bold">🌙 今日門市是否有「閉店客」服務？</label>
-                    <select name="has_closing_guest" id="has_closing_guest" onchange="toggleClosingGuestArea(this)" required>
-                        <option value="無">今日無閉店客服務</option>
-                        <option value="有">當日有留客服務 (需輸入下方明細)</option>
-                    </select>
-                    
-                    <div id="closingGuestDetail" class="mt-2 space-y-2" style="display:none;">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div><small class="text-gray-600 font-semibold">接待顧客數 (位)</small><input type="number" name="close_guest_count" id="close_guest_count" value="0"></div>
-                            <div><small class="text-gray-600 font-semibold">成交總金額 (元)</small><input type="number" name="close_guest_amount" id="close_guest_amount" value="0"></div>
-                        </div>
-                        <div><small class="text-gray-600 font-semibold">對應成交訂單編號 / 備註</small><input type="text" name="close_guest_note" id="close_guest_note" placeholder="如：A0123 / 留客半小時"></div>
-                    </div>
-                </div>
-
-                <div class="p-4 rounded-2xl border border-purple-200 bg-purple-50/40">
-                    <label class="text-purple-800 font-bold">📸 今日是否有顧客拿「網路商品照片」問貨？</label>
-                    <select name="has_photo_ask" id="has_photo_ask" onchange="togglePhotoAskArea(this)" required>
-                        <option value="無">今日無顧客拿網路照片問貨</option>
-                        <option value="有">有客人詢問，且【已拍照回傳】公司群組</option>
-                    </select>
-                    
-                    <div id="photoAskReasonArea" class="mt-2" style="display:none;">
-                        <label class="text-xs text-red-600">⚠️ 請說明原因或未回傳之特殊狀況：</label>
-                        <input type="text" name="photo_ask_reason" id="photo_ask_reason" placeholder="如：客人臨時詢問漏未拍攝、今日無此情況...">
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-title"><span>📅</span> 人員工作進度</div>
-            <div id="staffContainer">
-                <div class="perf-row staff-group">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                        <div>
-                            <label>回報人員姓名</label>
-                            <input type="text" name="staff_name[]" placeholder="請輸入姓名" required>
-                        </div>
-                        <div>
-                            <label>店務完成狀態</label>
-                            <select name="task_status[]" onchange="toggleTaskNote(this)" required>
-                                <option value="完成">✅ 全部完成</option>
-                                <option value="部分完成">⚠️ 部分完成 (請備註)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="reminder-box">
-                        💡 提醒：音樂 / 整潔 / 芬香 / 陳列 / 庫存 / 人台 / 穿搭
-                    </div>
-
-                    <div class="task-note-area" style="display:none">
-                        <label>未完成事項備註</label>
-                        <textarea name="task_note[]" rows="2" placeholder="請列出未完成的店務項目..."></textarea>
-                    </div>
-
-                    <div>
-                        <label>補充備品 / 報修狀況</label>
-                        <input type="text" name="maintenance[]" placeholder="如：衣架不足、燈泡故障...">
-                    </div>
-                </div>
-            </div>
-            <button type="button" onclick="addStaff()" class="text-pink-600 font-bold mb-6 hover:text-pink-700">＋ 新增人員進度</button>
-
-            <div class="section-title"><span>✍️</span> 今日工作分析與回饋</div>
-            <label>門店現況分析</label>
-            <textarea name="analysis" rows="3" placeholder="今天店裡有什麼從數據看不到的事？"></textarea>
+            <!-- 2. 核心特勤與顧客諮詢查核 -->
+            <div class="section-title"><span>🔍</span> 6月核心·特勤與顧客商品諮詢查核</div>
             
-            <label>今日熱銷排名 (Top 3)</label>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
-                <input type="text" name="hot_item_1" placeholder="1. 貨號">
-                <input type="text" name="hot_item_2" placeholder="2. 貨號">
-                <input type="text" name="hot_item_3" placeholder="3. 貨號">
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 md:mb-0">
-                    <label class="text-blue-700">給明天開班人員或自己的話 📋</label>
-                    <textarea name="to_next_shift" rows="3" placeholder="陳列倉儲那些還沒有用完，明天預計穿甚麼...啥沒做完還有打打氣!團隊才會旺"></textarea>
-                </div>
-                <div class="bg-green-50 p-4 rounded-2xl border border-green-100">
-                    <label class="text-green-700">給總部倉儲採購建議 📦</label>
-                    <textarea name="to_hq_warehouse" rows="3" placeholder="補貨/品質/配貨建議...什麼搞錯~什麼快來~什麼賣鉤來r"></textarea>
+            <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 mb-4">
+                <label>🔥 今日是否有閉店客服務？</label>
+                <select name="has_closing_customer" id="hasClosingCustomer" onchange="toggleClosingStaff()" required>
+                    <option value="無">❌ 無</option>
+                    <option value="有">✨ 有（請在下方填寫接待人員）</option>
+                </select>
+                
+                <!-- 動態隱藏/顯示的接待人員欄位 -->
+                <div id="closingStaffWrapper" class="hidden mt-2">
+                    <label class="text-sm text-pink-700">👤 閉店客接待人員是誰？</label>
+                    <input type="text" name="closing_staff" id="closingStaff" placeholder="請輸入接待夥伴的姓名（例如：琇琇、小魚）">
                 </div>
             </div>
-            <div class="mt-4">
-                <label class="text-purple-700">Rita 反饋 👑</label>
-                <textarea name="feedback_rita" rows="2" placeholder="產品反饋..."></textarea>
+
+            <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 mb-2">
+                <label>📸 今日是否有顧客拿網路商品照片問貨？</label>
+                <select name="has_photo_inquiry" required>
+                    <option value="無">❌ 無</option>
+                    <option value="有">🙋‍♀️ 有（客人詢問度高）</option>
+                </select>
+                <textarea name="photo_inquiry_detail" rows="2" placeholder="若有，請簡述客人是詢問哪一張照片/哪款服飾商品？"></textarea>
             </div>
 
-            <div class="flex flex-col sm:flex-row gap-5 mt-8">
-                <button type="submit" id="submitBtn" class="btn-primary flex-1 text-white font-bold py-5 rounded-2xl shadow-xl">完成並送出數據 🚀</button>
-                <button type="button" onclick="generatePreview()" class="flex-1 bg-gray-100 text-gray-700 font-bold py-5 rounded-2xl hover:bg-gray-200 transition">僅預覽 LINE 文字 📄</button>
-            </div>
+            <!-- 3. 今日工作分析與回饋 (大融合欄位) -->
+            <div class="section-title"><span>📝</span> 今日工作分析與回饋</div>
+            <p class="text-xs text-pink-700 bg-pink-50 p-3 rounded-xl border border-pink-100 mb-3 leading-relaxed">
+                💡 **填寫導引（可自由融合以下內容）：**<br>
+                • **店況分析：** 今天的整體銷售狀況、特殊客訴或店務突發事件處理。<br>
+                • **明天交接：** 有什麼需要交代給明天開班人員或特別提醒自己的話？<br>
+                • **公司建議：** 有沒有需要給總部、倉儲或採購的補貨/版型反饋建議？
+            </p>
+            <textarea name="work_feedback" rows="6" placeholder="請輸入今日門市的綜合分析與反饋..." required></textarea>
+
+            <button type="submit" id="submitBtn" class="w-full bg-pink-600 text-white font-bold py-4 rounded-2xl shadow-xl mt-4 hover:bg-pink-700 transition">傳送今日門市日報 🚀</button>
         </form>
 
-        <div id="resultContainer" class="card p-6 md:p-8 hidden">
-            <h2 class="text-2xl font-bold mb-5 flex justify-between items-center text-pink-700">
-                <span>📋 回報摘要預覽</span>
-                <button onclick="copyToClipboard()" class="text-sm bg-pink-600 text-white px-5 py-2 rounded-full hover:bg-pink-700">複製整份報告</button>
+        <!-- LINE 複製草稿區塊 -->
+        <div id="resultContainer" class="card p-6 hidden">
+            <h2 class="text-lg font-bold mb-3 text-pink-800 flex justify-between items-center">
+                <span>📋 LINE 門市回報草稿</span>
+                <button onclick="copyToClipboard()" class="text-xs bg-pink-600 text-white px-4 py-1.5 rounded-full hover:bg-pink-700 transition">複製文字</button>
             </h2>
-            <div id="uptAlert" class="upt-box mb-6 font-bold text-xl text-pink-600 hidden"></div>
-            <pre id="resultText" class="whitespace-pre-wrap bg-pink-50/50 p-6 rounded-2xl border border-pink-100 text-gray-700 text-sm leading-relaxed"></pre>
+            <pre id="resultText" class="whitespace-pre-wrap bg-pink-50 p-5 rounded-2xl text-gray-700 text-sm leading-relaxed border border-pink-100"></pre>
         </div>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycby9QLEMRA_wJUFImeJqNyN-GXkNpFim1MYuPHCCy-HJctbUvHpnpVqVpKVkcuymu8kJhA/exec'; 
+        // 自動帶入當天日期
+        document.getElementById('reportDate').valueAsDate = new Date();
 
-        document.getElementById('date').valueAsDate = new Date();
-        const dayMap = ['日','一','二','三','四','五','六'];
-        document.getElementById('weekday').value = dayMap[new Date().getDay()];
-
-        // 閉店客區塊切換
-        function toggleClosingGuestArea(el) {
-            const area = document.getElementById('closingGuestDetail');
-            area.style.display = el.value === '有' ? 'block' : 'none';
+        // 控制閉店客接待人員欄位的顯示與隱藏
+        function toggleClosingStaff() {
+            const hasClosing = document.getElementById('hasClosingCustomer').value;
+            const wrapper = document.getElementById('closingStaffWrapper');
+            const input = document.getElementById('closingStaff');
+            if (hasClosing === '有') {
+                wrapper.classList.remove('hidden');
+                input.required = true;
+            } else {
+                wrapper.classList.add('hidden');
+                input.required = false;
+                input.value = ''; // 清空
+            }
         }
 
-        // 照片詢問區塊切換 (留空或非正常回傳時的必填防呆)
-        function togglePhotoAskArea(el) {
-            const area = document.getElementById('photoAskReasonArea');
-            area.style.display = el.value === '無' ? 'block' : 'none';
-        }
-
-        function toggleTaskNote(el) {
-            const row = el.closest('.staff-group');
-            const noteArea = row.querySelector('.task-note-area');
-            noteArea.style.display = el.value === '部分完成' ? 'block' : 'none';
-        }
-
-        function addStaff() {
-            const container = document.getElementById('staffContainer');
-            const div = document.createElement('div');
-            div.className = 'perf-row staff-group animate-in fade-in slide-in-from-right-4 duration-300';
-            div.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                    <div><label>回報人員姓名</label><input type="text" name="staff_name[]" placeholder="請輸入姓名" required></div>
-                    <div>
-                        <label>店務完成狀態</label>
-                        <select name="task_status[]" onchange="toggleTaskNote(this)">
-                            <option value="完成">✅ 全部完成</option>
-                            <option value="部分完成">⚠️ 部分完成 (請備註)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="reminder-box">💡 提醒：音樂 / 整潔 / 芬香 / 陳列 / 庫存 / 人台 / 穿搭 / 備品回報 / 零錢</div>
-                <div class="task-note-area" style="display:none">
-                    <label>未完成事項備註</label>
-                    <textarea name="task_note[]" rows="2" placeholder="請列出未完成的店務項目..."></textarea>
-                </div>
-                <div><label>補充備品 / 報修狀況</label><input type="text" name="maintenance[]" placeholder="如：發票不足、袋子補多少..."></div>
-                <button type="button" onclick="this.parentElement.remove()" class="absolute top-4 right-4 text-gray-300 hover:text-red-400">✕</button>
-            `;
-            container.appendChild(div);
-        }
+        // 請記得檢查或替換成您串接此表單的 GAS 網址
+        const scriptURL = 'https://script.google.com/macros/s/你的網址/exec'; 
 
         const form = document.getElementById('storeForm');
         form.addEventListener('submit', e => {
             e.preventDefault();
             document.getElementById('loadingOverlay').style.display = 'flex';
+            
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: new FormData(form)})
             .then(() => {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 generatePreview();
             })
-            .catch(() => {
+            .catch(err => {
+                console.error(err);
                 document.getElementById('loadingOverlay').style.display = 'none';
                 generatePreview();
             });
@@ -283,76 +162,27 @@
 
         function generatePreview() {
             const data = new FormData(form);
-            const items = parseFloat(data.get('total_items')) || 0;
-            const orders = parseFloat(data.get('total_orders')) || 0;
-            const upt = orders > 0 ? (items / orders).toFixed(2) : 0;
-
-            let cheer = "";
-            let color = "text-pink-600";
-            if (upt < 2.49) { cheer = "🚀 加油！多多推廣+1搭配或是服務顧客甚至可以在社群多多發揮"; }
-            else if (upt <= 2.5) { cheer = "✅ 恭喜達標！今天的銷售節奏很棒喔！"; }
-            else { cheer = "👑 強強強！全台灣今天你最厲害！UPT 破 3 啦！"; color = "text-red-600"; }
-
-            const uptAlert = document.getElementById('uptAlert');
-            uptAlert.innerText = cheer;
-            uptAlert.className = `upt-box mb-6 font-bold text-xl ${color}`;
-            uptAlert.classList.remove('hidden');
-
-            const names = data.getAll('staff_name[]');
-            const statuses = data.getAll('task_status[]');
-            const notes = data.getAll('task_note[]');
-            const mains = data.getAll('maintenance[]');
+            const closingStaffStr = data.get('closing_staff') ? ` (接待人員：${data.get('closing_staff')})` : '';
             
-            let progressText = "";
-            names.forEach((n, i) => { 
-                if(n) {
-                    progressText += `・${n}: [${statuses[i]}]\n`; 
-                    if(statuses[i] === '部分完成') progressText += `   └ ⚠️ 未完成: ${notes[i] || '未填'}\n`;
-                    if(mains[i]) progressText += `   └ 🔧 報修/備品: ${mains[i]}\n`;
-                }
-            });
-
-            let hotItems = "";
-            for(let i=1; i<=3; i++) {
-                const item = data.get(`hot_item_${i}`);
-                if(item) hotItems += `${i}. ${item}\n`;
+            let report = `📊 《ZC 門市績效日報》\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n`;
+            report += `📅 日期：${data.get('report_date')}\n`;
+            report += `📍 門市：${data.get('store_name')}\n`;
+            report += `👥 今日人流體感：${data.get('passenger_flow')}\n`;
+            report += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            report += `《 核心特勤與商品諮詢查核 🔍 》\n`;
+            report += `🌙 閉店客服務：${data.get('has_closing_customer')}${closingStaffStr}\n`;
+            report += `📸 照片問貨：${data.get('has_photo_inquiry')}\n`;
+            if(data.get('photo_inquiry_detail')) {
+                report += `💬 問貨詳情：${data.get('photo_inquiry_detail')}\n`;
             }
-
-            // 處理新項目的文字生成
-            let closingGuestReport = "";
-            if(data.get('has_closing_guest') === '有') {
-                closingGuestReport = `🌙 有留客服務 ➔ 接待: ${data.get('close_guest_count')}位 | 成交金額: $${data.get('close_guest_amount')}元\n   └ 📝 單號/備註: ${data.get('close_guest_note') || '無'}\n`;
-            } else {
-                closingGuestReport = `🌙 今日無特殊閉店留客客案件\n`;
-            }
-
-            let photoAskReport = "";
-            if(data.get('has_photo_ask') === '有') {
-                photoAskReport = `📸 有客人拿網路照片問貨 ➔ 【已拍照回傳】公司群組維護核查\n`;
-            } else {
-                photoAskReport = `📸 今日無客人拿照片問貨 ➔ 備註說明: ${data.get('photo_ask_reason') || '今日無此狀況'}\n`;
-            }
-
-            let report = `✨ 《${data.get('store_name')}》工作進度回報 ✨\n`;
+            report += `\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            report += `📝 【今日工作分析與回饋】：\n`;
+            report += `${data.get('work_feedback')}\n\n`;
             report += `━━━━━━━━━━━━━━━━━━━━\n`;
-            report += `📅 日期：${data.get('date')} (${data.get('weekday')})\n`;
-            report += `👥 進店人流：${data.get('visitor_count')} 人\n`;
-            report += `📦 總件/筆數：${items} / ${orders}\n`;
-            report += `📈 UPT 平均件數：${upt} (${upt >= 2.41 ? '達標' : '再努力看看'})\n`;
-            report += `💎 全店 VIP 開發：${data.get('total_vip_all')}\n`;
-            report += `━━━━━━━━━━━━━━━━━━━━\n`;
-            report += `《 🌙 閉店客與網路諮詢回報 》\n`;
-            report += closingGuestReport;
-            report += photoAskReport;
-            report += `━━━━━━━━━━━━━━━━━━━━\n`;
-            report += `《 工作進度回報 📅 》\n${progressText}\n`;
-            report += `《 今日門市狀況與顧客分析回報 📝 》\n${data.get('analysis') || '無'}\n\n`;
-            report += `《 今日熱銷排名 🔥 》\n${hotItems || '無'}\n`;
-            report += `《 给明天開班人員備註 📋 》\n${data.get('to_next_shift') || '無'}\n\n`;
-            report += `《 給總部倉儲及主管建議 📦 》\n${data.get('to_hq_warehouse') || '無'}\n\n`;
-            report += `《 給老闆的反饋 》\n${data.get('feedback_rita') || '無'}\n`;
-            report += `━━━━━━━━━━━━━━━━━━━━\n`;
-            report += `💕 ${cheer.split('！')[0]}！辛苦了！今天有你真好~千萬別忘記服務先行業績隨行,讓我們一起致力於滿足顧客需求`;
+            report += `✨ 門市營運日報已上傳。大家辛苦了！`;
 
             document.getElementById('resultText').innerText = report;
             document.getElementById('resultContainer').classList.remove('hidden');
@@ -364,9 +194,7 @@
             const el = document.createElement('textarea');
             el.value = text; document.body.appendChild(el); el.select();
             document.execCommand('copy'); document.body.removeChild(el);
-            const btn = event.target;
-            btn.innerText = "✅ 已複製報告！";
-            setTimeout(() => { btn.innerText = "複製整份報告"; }, 2000);
+            alert('已複製到剪貼簿，可以傳到 LINE 群組囉！');
         }
     </script>
 </body>
